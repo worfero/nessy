@@ -3,7 +3,9 @@
 
 #include <cstdint>
 
-struct Registers {
+class Bus;
+
+struct Registers{
     uint8_t A;
     uint8_t X;
     uint8_t Y;
@@ -12,11 +14,9 @@ struct Registers {
     uint16_t PC;
 };
 
-class CPU {
+class CPU{
 public:
-    Registers registers;
-
-    enum StatusFlag : uint8_t {
+    enum StatusFlag : uint8_t{
         CARRY     = 1 << 0,
         ZERO      = 1 << 1,
         INTERRUPT = 1 << 2,
@@ -34,7 +34,16 @@ public:
     void setFlag(StatusFlag flag, bool value);
     bool getFlag(StatusFlag flag) const;
 
-    void print_registers() const;
+    void connectBus(Bus *selec_bus);
+
+    void printRegisters() const;
+
+private:
+    Registers registers;
+    Bus *bus = nullptr;
+
+    uint8_t readBus(uint16_t address);
+    void writeBus(uint16_t address, uint8_t data);
 };
 
 #endif
