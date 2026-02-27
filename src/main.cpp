@@ -1,24 +1,12 @@
-#include "../include/cpu.h"
-#include "../include/sram.h"
-#include "../include/bus.h"
+#include "../include/NES.h"
 
 int main(){
-    CPU cpu;
-    Bus bus;
-    SRAM sram;
+    NES nes;
 
-    cpu.connectBus(&bus);
-    bus.connectSRAM(&sram);
+    nes.printCpuRegisters();
 
-    cpu.reset();
-    cpu.printRegisters();
-
-    cpu.setFlag(CPU::CARRY, true);
-    cpu.printRegisters();
-
-    bus.write(0x000A, 8);
-
-    sram.printMemoryMap();
+    nes.setCpuFlag(CPU::CARRY, true);
+    nes.printCpuRegisters();
 
     return 0;
 }
