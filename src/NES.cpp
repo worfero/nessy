@@ -4,10 +4,15 @@
 
 NES::NES() : bus(), 
              cpu(bus),
-             sram()
+             sram(),
+             cartridge()
 {
     bus.connectSRAM(&sram);
+    bus.connectCartridge(&cartridge);
+
     loadTestProgram();
+    cpu.reset();
+
     isRunning = false;
 }
 
@@ -36,11 +41,13 @@ void NES::reset(){
 }
 
 void NES::loadTestProgram(){
-    uint16_t startMemory = 0x0800;
+    // reset vector
+    bus.write(CARTRIDGE_START_ADDR + 0x7FFC, 0x00);
+    bus.write(CARTRIDGE_START_ADDR + 0x7FFD, 0x80);
 
     // LDA #$42 | 0xA9 0x42
-    bus.write(startMemory, 0xA9);
-    bus.write(startMemory + 1, 0x42);
+    bus.write(CARTRIDGE_START_ADDR, 0xA9);
+    bus.write(CARTRIDGE_START_ADDR + 0x0001, 0x42);
 }
 
 void NES::setCpuFlag(CPU::StatusFlag flag, bool value){

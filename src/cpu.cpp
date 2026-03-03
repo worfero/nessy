@@ -7,7 +7,7 @@ CPU::CPU(Bus &selec_bus) : bus(selec_bus){
     registers.A = registers.X = registers.Y = 0;
     registers.SP = 0xFD;      // starting stack pointer
     registers.P  = 0x24;      // 0010 0100 - interrupt disabled and unused bit set
-    registers.PC = 0;
+    registers.PC = 0x8000;    // default PGR-ROM start address
 }
 
 void CPU::clock(){
@@ -18,7 +18,10 @@ void CPU::reset(){
     registers.A = registers.X = registers.Y = 0;
     registers.SP = 0xFD;
     registers.P  = 0x24;
-    registers.PC = 0x0000;
+
+    uint16_t reset_lo = bus.read(0xFFFC);
+    uint16_t reset_hi = bus.read(0xFFFD);
+    registers.PC = (reset_hi << 8) | reset_lo;
 }
 
 void CPU::setFlag(StatusFlag flag, bool value){

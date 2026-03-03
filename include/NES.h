@@ -4,8 +4,7 @@
 #include "../include/cpu.h"
 #include "../include/sram.h"
 #include "../include/bus.h"
-
-#define MEMORY_MAP_SIZE 0xFFFF
+#include "../include/cartridge.h"
 
 class NES {
     public:
@@ -19,6 +18,8 @@ class NES {
 
         uint64_t cycleCount = 0;
 
+        void loadTestProgram();
+
         // CPU public functions
         void setCpuFlag(CPU::StatusFlag flag, bool value);
         void printCpuRegisters();
@@ -30,8 +31,7 @@ class NES {
         Bus bus;
         CPU cpu;
         SRAM sram;
-
-        void loadTestProgram();
+        Cartridge cartridge;
 
         bool isRunning;
 };
