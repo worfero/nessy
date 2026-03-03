@@ -4,6 +4,8 @@
 #include <cstdint>
 #include <array>
 
+#define RAM_SIZE 2048
+
 class SRAM{
 public:
     SRAM();
@@ -11,10 +13,10 @@ public:
     uint8_t read(uint16_t address);
     void write(uint16_t address, uint8_t data);
 
-    void printMemoryMap();
+    void printMemoryMap(uint16_t startAddr, uint16_t rows);
 
 private:
-    std::array<uint8_t, 2048> memory{};
+    std::array<uint8_t, RAM_SIZE> memory{};
 };
 
 #endif

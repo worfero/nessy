@@ -3,10 +3,7 @@
 int main(){
     NES nes;
 
-    nes.printCpuRegisters();
-
-    nes.setCpuFlag(CPU::CARRY, true);
-    nes.printCpuRegisters();
+    nes.printMemoryMap(0x0FFF, 2);
 
     return 0;
 }
