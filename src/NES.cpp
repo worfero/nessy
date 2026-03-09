@@ -10,16 +10,47 @@ NES::NES() : bus(),
     bus.connectSRAM(&sram);
     bus.connectCartridge(&cartridge);
 
+    isRunning = false;
+}
+
+void NES::powerOn(){
     loadTestProgram();
     cpu.reset();
-
-    isRunning = false;
 }
 
 void NES::run(){
     isRunning = true;
     while(isRunning){
         clock();
+    }
+}
+
+void NES::stepCpu(){
+    // make sure the current instruction gets finished (if there is one to begin with)
+    while(cpu.getInstructionCycleCounter() > 0){
+        clock();
+    }
+
+    // clock until it's a CPU clock time
+    do{
+        clock();
+    }
+    while(!cpuClock);
+    
+    // fetch next instruction and wait until it's finished
+    while(cpu.getInstructionCycleCounter() > 0){
+        clock();
+    };
+}
+
+void NES::runCycles(int16_t cycles){
+    isRunning = true;
+    while(isRunning){
+        if(cycles == 0){
+            stop();
+        }
+        clock();
+        cycles--;
     }
 }
 
@@ -30,6 +61,10 @@ void NES::stop(){
 void NES::clock(){
     if(cycleCount % 3 == 0){
         cpu.clock();
+        cpuClock = true;
+    }
+    else{
+        cpuClock = false;
     }
 
     cycleCount++;
@@ -45,17 +80,36 @@ void NES::loadTestProgram(){
     bus.write(CARTRIDGE_START_ADDR + 0x7FFC, 0x00);
     bus.write(CARTRIDGE_START_ADDR + 0x7FFD, 0x80);
 
-    // LDA #$42 | 0xA9 0x42
-    bus.write(CARTRIDGE_START_ADDR, 0xA9);
-    bus.write(CARTRIDGE_START_ADDR + 0x0001, 0x42);
+    // LDA #$D6 | 0xA9 0xD6
+    bus.write(CARTRIDGE_START_ADDR + 0x0000, 0xA9);
+    bus.write(CARTRIDGE_START_ADDR + 0x0001, 0xD6);
+    // LDA #$D6 | 0xA9 0x00
+    bus.write(CARTRIDGE_START_ADDR + 0x0002, 0xA9);
+    bus.write(CARTRIDGE_START_ADDR + 0x0003, 0x00);
+}
+
+void NES::printCycleCounts(){
+    std::printf("---------Cycles--------- \nSystem cycles: %lu \nCPU cycles: %lu\n\n", cycleCount, cpu.getCycleCount());
 }
 
 void NES::setCpuFlag(CPU::StatusFlag flag, bool value){
     cpu.setFlag(flag, value);
 }
 
+bool NES::getCpuFlag(CPU::StatusFlag flag) const{
+    return cpu.getFlag(flag);
+}
+
+uint8_t NES::getCpuCycleCount() const{
+    return cpu.getCycleCount();
+}
+
 void NES::printCpuRegisters(){
     cpu.printRegisters();
+}
+
+void NES::printCpuFlags(){
+    cpu.printFlags();
 }
 
 void NES::printMemoryMap(uint16_t startAddr, uint16_t rows){
