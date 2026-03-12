@@ -36,7 +36,7 @@ void NES::stepCpu(){
         clock();
     }
     while(!cpuClock);
-    
+
     // fetch next instruction and wait until it's finished
     while(cpu.getInstructionCycleCounter() > 0){
         clock();
@@ -83,9 +83,12 @@ void NES::loadTestProgram(){
     // LDA #$D6 | 0xA9 0xD6
     bus.write(CARTRIDGE_START_ADDR + 0x0000, 0xA9);
     bus.write(CARTRIDGE_START_ADDR + 0x0001, 0xD6);
-    // LDA #$D6 | 0xA9 0x00
+    // LDA #$00 | 0xA9 0x00
     bus.write(CARTRIDGE_START_ADDR + 0x0002, 0xA9);
     bus.write(CARTRIDGE_START_ADDR + 0x0003, 0x00);
+    // LDA #$70 | 0xA9 0x70
+    bus.write(CARTRIDGE_START_ADDR + 0x0004, 0xA9);
+    bus.write(CARTRIDGE_START_ADDR + 0x0005, 0x70);
 }
 
 void NES::printCycleCounts(){

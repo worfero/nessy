@@ -23,5 +23,11 @@ int main(){
     nes.printCpuFlags();
     nes.printCpuRegisters();
 
+    nes.stepCpu();
+
+    nes.printCycleCounts();
+    nes.printCpuFlags();
+    nes.printCpuRegisters();
+
     return 0;
 }

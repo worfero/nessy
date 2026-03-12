@@ -13,6 +13,7 @@ CPU::CPU(Bus &selec_bus) : bus(selec_bus){
 }
 
 uint8_t CPU::XXX(){
+    std::printf("Illegal opcode detected.\n\n");
     return 0;
 }
 
@@ -30,6 +31,119 @@ uint8_t CPU::IMP(){
 uint8_t CPU::IMM(){
     fetchAddr = registers.PC;
     registers.PC++;
+    return 0;
+}
+
+uint8_t CPU::ACC(){
+    return 0;
+}
+
+uint8_t CPU::ZP(){
+    fetchAddr = bus.read(registers.PC++);
+    fetchAddr &= 0x00FF;
+    return 0;
+}
+
+uint8_t CPU::ZPX(){
+    fetchAddr = bus.read(registers.PC++);
+    fetchAddr = (fetchAddr + registers.X) & 0x00FF;
+    return 0;
+}
+
+uint8_t CPU::ZPY(){
+    fetchAddr = bus.read(registers.PC++);
+    fetchAddr = (fetchAddr + registers.Y) & 0x00FF;
+    return 0;
+}
+
+uint8_t CPU::ABS(){
+    uint16_t loByte = bus.read(registers.PC++);
+    uint16_t hiByte = bus.read(registers.PC++);
+    fetchAddr = (hiByte << 8) | loByte;
+    return 0;
+}
+
+uint8_t CPU::ABX(){
+    uint16_t loByte = bus.read(registers.PC++);
+    uint16_t hiByte = bus.read(registers.PC++);
+
+    uint16_t baseAddr = (hiByte << 8) | loByte;
+    fetchAddr = baseAddr + registers.X;
+
+    if((fetchAddr & 0xFF00) != (baseAddr & 0xFF00)){
+        return 1;
+    }
+
+    return 0;
+}
+
+uint8_t CPU::ABY(){
+    uint16_t loByte = bus.read(registers.PC++);
+    uint16_t hiByte = bus.read(registers.PC++);
+
+    uint16_t baseAddr = (hiByte << 8) | loByte;
+    fetchAddr = baseAddr + registers.Y;
+
+    if((fetchAddr & 0xFF00) != (baseAddr & 0xFF00)){
+        return 1;
+    }
+
+    return 0;
+}
+
+uint8_t CPU::IND(){
+    uint16_t ptrLoByte = bus.read(registers.PC++);
+    uint16_t ptrHiByte = bus.read(registers.PC++);
+    uint16_t ptr = (ptrHiByte << 8) | ptrLoByte;
+
+    uint16_t loByte = bus.read(ptr);
+    uint16_t hiByte;
+
+    // 6502 page boundary bug replication
+    if(ptrLoByte == 0xFF){
+        hiByte = bus.read(ptr & 0xFF00);
+    }
+    else{
+        hiByte = bus.read(ptr + 1);
+    }
+
+    fetchAddr = (hiByte << 8) | loByte;
+
+    return 0;
+}
+
+uint8_t CPU::IZX(){
+    uint16_t ptr = bus.read(registers.PC++);
+    ptr = (ptr + registers.X) & 0x00FF;
+
+    uint16_t loByte = bus.read(ptr++);
+    uint16_t hiByte = bus.read(ptr & 0x00FF);
+
+    fetchAddr = (hiByte << 8) | loByte;
+
+    return 0;
+}
+
+uint8_t CPU::IZY(){
+    uint16_t ptr = bus.read(registers.PC++);
+
+    uint16_t loByte = bus.read(ptr & 0x00FF);
+    uint16_t hiByte = bus.read((ptr + 1) & 0x00FF);
+    uint16_t baseAddr = (hiByte << 8) | loByte;
+
+    fetchAddr = baseAddr + registers.Y;
+
+    if((fetchAddr & 0xFF00) != (baseAddr & 0xFF00)){
+        return 1;
+    }
+
+    return 0;
+}
+
+uint8_t CPU::REL(){
+    int8_t addrOffset = bus.read(registers.PC++);
+    fetchAddr = registers.PC + addrOffset;
+
     return 0;
 }
 
