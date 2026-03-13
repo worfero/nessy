@@ -150,7 +150,14 @@ uint8_t CPU::REL(){
 void CPU::fillOpcodes(){
     instructions.fill({"XXX", &CPU::XXX, &CPU::IMP, 2});
 
+    instructions[0xA1] = {"LDA", &CPU::LDA, &CPU::IZX, 6};
+    instructions[0xA5] = {"LDA", &CPU::LDA, &CPU::ZP, 3};
     instructions[0xA9] = {"LDA", &CPU::LDA, &CPU::IMM, 2};
+    instructions[0xAD] = {"LDA", &CPU::LDA, &CPU::ABS, 4};
+    instructions[0xB1] = {"LDA", &CPU::LDA, &CPU::IZY, 5};
+    instructions[0xB5] = {"LDA", &CPU::LDA, &CPU::ZPX, 4};
+    instructions[0xB9] = {"LDA", &CPU::LDA, &CPU::ABY, 4};
+    instructions[0xBD] = {"LDA", &CPU::LDA, &CPU::ABX, 4};
 }
 
 uint8_t CPU::fetchValue(){
@@ -179,6 +186,10 @@ void CPU::clock(){
 
 void CPU::reset(){
     registers.A = registers.X = registers.Y = 0;
+    // test
+    registers.X = 0x0004;
+    registers.Y = 0x0003;
+    // end test
     registers.SP = 0xFD;
     registers.P  = 0x24;
 

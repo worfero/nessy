@@ -80,15 +80,46 @@ void NES::loadTestProgram(){
     bus.write(CARTRIDGE_START_ADDR + 0x7FFC, 0x00);
     bus.write(CARTRIDGE_START_ADDR + 0x7FFD, 0x80);
 
+    // set memories to test (not actual cartridge code)
+    bus.write(0x0010, 0x20);
+    bus.write(0x0013, 0x21);
+    bus.write(0x0014, 0x23);
+    bus.write(0x9000, 0x45);
+    bus.write(0x9003, 0x46);
+    bus.write(0x9004, 0x47);
+    bus.write(0x0024, 0x00);
+    bus.write(0x0025, 0x94);
+    bus.write(0x9400, 0x29);
+    bus.write(0x0030, 0x50);
+    bus.write(0x0053, 0x70);
+
     // LDA #$D6 | 0xA9 0xD6
     bus.write(CARTRIDGE_START_ADDR + 0x0000, 0xA9);
     bus.write(CARTRIDGE_START_ADDR + 0x0001, 0xD6);
-    // LDA #$00 | 0xA9 0x00
-    bus.write(CARTRIDGE_START_ADDR + 0x0002, 0xA9);
-    bus.write(CARTRIDGE_START_ADDR + 0x0003, 0x00);
-    // LDA #$70 | 0xA9 0x70
-    bus.write(CARTRIDGE_START_ADDR + 0x0004, 0xA9);
-    bus.write(CARTRIDGE_START_ADDR + 0x0005, 0x70);
+    // LDA $10 | 0xA5 0x10
+    bus.write(CARTRIDGE_START_ADDR + 0x0002, 0xA5);
+    bus.write(CARTRIDGE_START_ADDR + 0x0003, 0x10);
+    // LDA $10, X | 0xB5 0x10
+    bus.write(CARTRIDGE_START_ADDR + 0x0004, 0xB5);
+    bus.write(CARTRIDGE_START_ADDR + 0x0005, 0x10);
+    // LDA $9000 | 0xAD 0x00 0x90
+    bus.write(CARTRIDGE_START_ADDR + 0x0006, 0xAD);
+    bus.write(CARTRIDGE_START_ADDR + 0x0007, 0x00);
+    bus.write(CARTRIDGE_START_ADDR + 0x0008, 0x90);
+    // LDA $9000, X | 0xBD 0x00 0x90
+    bus.write(CARTRIDGE_START_ADDR + 0x0009, 0xBD);
+    bus.write(CARTRIDGE_START_ADDR + 0x000A, 0x00);
+    bus.write(CARTRIDGE_START_ADDR + 0x000B, 0x90);
+    // LDA $9000, Y | 0xB9 0x00 0x90
+    bus.write(CARTRIDGE_START_ADDR + 0x000C, 0xB9);
+    bus.write(CARTRIDGE_START_ADDR + 0x000D, 0x00);
+    bus.write(CARTRIDGE_START_ADDR + 0x000E, 0x90);
+    // LDA ($20,X) | 0xA1 0x20
+    bus.write(CARTRIDGE_START_ADDR + 0x000F, 0xA1);
+    bus.write(CARTRIDGE_START_ADDR + 0x0010, 0x20);
+    // LDA ($30), Y | 0xB1 0x30
+    bus.write(CARTRIDGE_START_ADDR + 0x0011, 0xB1);
+    bus.write(CARTRIDGE_START_ADDR + 0x0012, 0x30);
 }
 
 void NES::printCycleCounts(){
