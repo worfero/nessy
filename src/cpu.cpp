@@ -161,9 +161,21 @@ uint8_t CPU::LDY(){
     return 1;
 }
 
+uint8_t CPU::STA(){
+    bus.write(fetchAddr, registers.A);
+    return 0;
+}
+
 void CPU::fillOpcodes(){
     instructions.fill({"XXX", &CPU::XXX, &CPU::IMP, 2});
 
+    instructions[0x81] = {"STA", &CPU::STA, &CPU::IZX, 6};
+    instructions[0x85] = {"STA", &CPU::STA, &CPU::ZP, 3};
+    instructions[0x8D] = {"STA", &CPU::STA, &CPU::ABS, 4};
+    instructions[0x91] = {"STA", &CPU::STA, &CPU::IZY, 6};
+    instructions[0x95] = {"STA", &CPU::STA, &CPU::ZPX, 4};
+    instructions[0x99] = {"STA", &CPU::STA, &CPU::ABY, 5};
+    instructions[0x9D] = {"STA", &CPU::STA, &CPU::ABX, 5};
     instructions[0xA0] = {"LDY", &CPU::LDY, &CPU::IMM, 2};
     instructions[0xA1] = {"LDA", &CPU::LDA, &CPU::IZX, 6};
     instructions[0xA2] = {"LDX", &CPU::LDX, &CPU::IMM, 2};
@@ -212,10 +224,6 @@ void CPU::reset(){
     registers.A = registers.X = registers.Y = 0;
     registers.SP = 0xFD;
     registers.P  = 0x24;
-
-    // test
-    registers.X = 0x03;
-    // end test
 
     uint16_t reset_lo = bus.read(0xFFFC);
     uint16_t reset_hi = bus.read(0xFFFD);

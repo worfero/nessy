@@ -85,6 +85,7 @@ private:
     uint8_t LDA();
     uint8_t LDX();
     uint8_t LDY();
+    uint8_t STA();
 
     void fillOpcodes();
 
