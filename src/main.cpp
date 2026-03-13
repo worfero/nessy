@@ -32,20 +32,5 @@ int main(){
     nes.printCycleCounts();
     nes.printCpuRegisters();
 
-    nes.stepCpu();
-
-    nes.printCycleCounts();
-    nes.printCpuRegisters();
-
-    nes.stepCpu();
-
-    nes.printCycleCounts();
-    nes.printCpuRegisters();
-
-    nes.stepCpu();
-
-    nes.printCycleCounts();
-    nes.printCpuRegisters();
-
     return 0;
 }

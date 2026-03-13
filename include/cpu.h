@@ -65,10 +65,6 @@ private:
     uint8_t fetchedValue = 0;
     uint16_t fetchAddr = 0;
 
-    // instruction set
-    uint8_t XXX();
-    uint8_t LDA();
-
     // addressing modes
     uint8_t IMP();
     uint8_t ACC();
@@ -83,6 +79,11 @@ private:
     uint8_t IZX();
     uint8_t IZY();
     uint8_t REL();
+
+    // instruction set
+    uint8_t XXX();
+    uint8_t LDA();
+    uint8_t LDX();
 
     void fillOpcodes();
 
