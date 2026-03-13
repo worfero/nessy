@@ -187,8 +187,8 @@ void CPU::clock(){
 void CPU::reset(){
     registers.A = registers.X = registers.Y = 0;
     // test
-    registers.X = 0x0004;
-    registers.Y = 0x0003;
+    registers.X = 4;
+    registers.Y = 3;
     // end test
     registers.SP = 0xFD;
     registers.P  = 0x24;
