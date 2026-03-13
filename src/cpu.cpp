@@ -154,20 +154,32 @@ uint8_t CPU::LDX(){
     return 1;
 }
 
+uint8_t CPU::LDY(){
+    registers.Y = fetchValue();
+    setFlag(ZERO, registers.Y == 0);
+    setFlag(NEGATIVE, registers.Y & 0x80);
+    return 1;
+}
+
 void CPU::fillOpcodes(){
     instructions.fill({"XXX", &CPU::XXX, &CPU::IMP, 2});
 
+    instructions[0xA0] = {"LDY", &CPU::LDY, &CPU::IMM, 2};
     instructions[0xA1] = {"LDA", &CPU::LDA, &CPU::IZX, 6};
     instructions[0xA2] = {"LDX", &CPU::LDX, &CPU::IMM, 2};
+    instructions[0xA4] = {"LDY", &CPU::LDY, &CPU::ZP, 3};
     instructions[0xA5] = {"LDA", &CPU::LDA, &CPU::ZP, 3};
     instructions[0xA6] = {"LDX", &CPU::LDX, &CPU::ZP, 3};
     instructions[0xA9] = {"LDA", &CPU::LDA, &CPU::IMM, 2};
+    instructions[0xAC] = {"LDY", &CPU::LDY, &CPU::ABS, 4};
     instructions[0xAD] = {"LDA", &CPU::LDA, &CPU::ABS, 4};
     instructions[0xAE] = {"LDX", &CPU::LDX, &CPU::ABS, 4};
     instructions[0xB1] = {"LDA", &CPU::LDA, &CPU::IZY, 5};
+    instructions[0xB4] = {"LDY", &CPU::LDY, &CPU::ZPX, 4};
     instructions[0xB5] = {"LDA", &CPU::LDA, &CPU::ZPX, 4};
     instructions[0xB6] = {"LDX", &CPU::LDX, &CPU::ZPY, 4};
     instructions[0xB9] = {"LDA", &CPU::LDA, &CPU::ABY, 4};
+    instructions[0xBC] = {"LDY", &CPU::LDY, &CPU::ABX, 4};
     instructions[0xBD] = {"LDA", &CPU::LDA, &CPU::ABX, 4};
     instructions[0xBE] = {"LDX", &CPU::LDX, &CPU::ABY, 4};
 }
@@ -202,7 +214,7 @@ void CPU::reset(){
     registers.P  = 0x24;
 
     // test
-    registers.Y = 0x03;
+    registers.X = 0x03;
     // end test
 
     uint16_t reset_lo = bus.read(0xFFFC);

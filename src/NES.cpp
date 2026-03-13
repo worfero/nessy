@@ -86,21 +86,21 @@ void NES::loadTestProgram(){
     bus.write(0x9000, 0x45);
     bus.write(0x9003, 0x08);
 
-    // LDX #$44 | 0xA2 0x44
-    bus.write(CARTRIDGE_START_ADDR + 0x0000, 0xA2);
+    // LDY #$44 | 0xA0 0x44
+    bus.write(CARTRIDGE_START_ADDR + 0x0000, 0xA0);
     bus.write(CARTRIDGE_START_ADDR + 0x0001, 0x44);
-    // LDX $44 | 0xA6 0x10
-    bus.write(CARTRIDGE_START_ADDR + 0x0002, 0xA6);
+    // LDY $44 | 0xA4 0x10
+    bus.write(CARTRIDGE_START_ADDR + 0x0002, 0xA4);
     bus.write(CARTRIDGE_START_ADDR + 0x0003, 0x44);
-    // LDX $10, Y | 0xB6 0x10
-    bus.write(CARTRIDGE_START_ADDR + 0x0004, 0xB6);
+    // LDY $10, X | 0xB4 0x10
+    bus.write(CARTRIDGE_START_ADDR + 0x0004, 0xB4);
     bus.write(CARTRIDGE_START_ADDR + 0x0005, 0x10);
-    // LDX $9000 | 0xAE 0x00 0x90
-    bus.write(CARTRIDGE_START_ADDR + 0x0006, 0xAE);
+    // LDY $9000 | 0xAC 0x00 0x90
+    bus.write(CARTRIDGE_START_ADDR + 0x0006, 0xAC);
     bus.write(CARTRIDGE_START_ADDR + 0x0007, 0x00);
     bus.write(CARTRIDGE_START_ADDR + 0x0008, 0x90);
-    // LDX $9000, Y | 0xBE 0x00 0x90
-    bus.write(CARTRIDGE_START_ADDR + 0x0009, 0xBE);
+    // LDY $9000, X | 0xBC 0x00 0x90
+    bus.write(CARTRIDGE_START_ADDR + 0x0009, 0xBC);
     bus.write(CARTRIDGE_START_ADDR + 0x000A, 0x00);
     bus.write(CARTRIDGE_START_ADDR + 0x000B, 0x90);
 }
