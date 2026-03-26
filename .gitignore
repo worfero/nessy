@@ -1,2 +1,5 @@
 notes.txt
 *.o
+*.nes
+*.fns
+*.asm

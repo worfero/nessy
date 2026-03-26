@@ -21,7 +21,7 @@ uint8_t Bus::read(uint16_t address){
         return sram->read(address);
     }
     else if(address >= CARTRIDGE_START_ADDR && address <= MEMORY_MAP_SIZE){
-        return cartridge->read(address - CARTRIDGE_START_ADDR);
+        return cartridge->read(address);
     }
 
     return 0;

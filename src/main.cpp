@@ -4,6 +4,8 @@ int main(){
     NES nes;
     nes.powerOn();
 
+    nes.printMemoryMap(0xFFFC, 5);
+
     nes.printCycleCounts();
     nes.printCpuRegisters();
 

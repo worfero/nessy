@@ -2,13 +2,15 @@
 #define CARTRIDGE_H
 
 #include <cstdint>
-#include <array>
-
-#define CARTRIDGE_MEM_SIZE 0x7FFF
+#include <vector>
+#include <string>
+#include <fstream>
 
 class Cartridge{
 public:
     Cartridge();
+
+    bool loadRomFile(const std::string &filename);
 
     uint8_t read(uint16_t address);
     void write(uint16_t address, uint8_t data);
@@ -16,7 +18,7 @@ public:
     void printMemoryMap(uint16_t startAddr, uint16_t rows);
 
 private:
-    std::array<uint8_t, CARTRIDGE_MEM_SIZE> memory{};
+    std::vector<uint8_t> memory{};
 };
 
 #endif

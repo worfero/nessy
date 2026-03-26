@@ -229,6 +229,8 @@ void CPU::reset(){
     uint16_t reset_hi = bus.read(0xFFFD);
     registers.PC = (reset_hi << 8) | reset_lo;
 
+    std::printf("\n\n\n%u\n\n\n", reset_hi);
+
     fetchedValue = 0;
     fetchAddr = 0;
 

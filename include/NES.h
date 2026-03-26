@@ -22,8 +22,6 @@ class NES {
         uint64_t cycleCount = 0;
         bool cpuClock = false;
 
-        void loadTestProgram();
-
         void printCycleCounts();
 
         // CPU public functions
