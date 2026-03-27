@@ -240,9 +240,40 @@ uint8_t CPU::DEY(){
     return 0;
 }
 
+uint8_t CPU::CLC(){
+    setFlag(CARRY, 0);
+
+    return 0;
+}
+
+uint8_t CPU::ADC(){
+    uint8_t addValue = fetchValue();
+    uint16_t result = registers.A + addValue + getFlag(CARRY);
+
+    // checks if MSB of A and the fetched value is the same, then checks if the MSB of A and the final result is the same
+    bool isOverflow = ((~(registers.A ^ addValue) & (registers.A ^ result)) & 0x80) != 0;
+    registers.A = result & 0x00FF;
+
+    setFlag(CARRY, result > 0xFF);
+    setFlag(ZERO, registers.A == 0);
+    setFlag(NEGATIVE, registers.A & 0x80);
+    setFlag(OVERFLOW, isOverflow);
+
+    return 1;
+}
+
 void CPU::fillOpcodes(){
     instructions.fill({"XXX", &CPU::XXX, &CPU::IMP, 2});
 
+    instructions[0x18] = {"CLC", &CPU::CLC, &CPU::IMP, 2};
+    instructions[0x61] = {"ADC", &CPU::ADC, &CPU::IZX, 6};
+    instructions[0x65] = {"ADC", &CPU::ADC, &CPU::ZP, 3};
+    instructions[0x69] = {"ADC", &CPU::ADC, &CPU::IMM, 2};
+    instructions[0x6D] = {"ADC", &CPU::ADC, &CPU::ABS, 4};
+    instructions[0x71] = {"ADC", &CPU::ADC, &CPU::IZY, 5};
+    instructions[0x75] = {"ADC", &CPU::ADC, &CPU::ZPX, 4};
+    instructions[0x79] = {"ADC", &CPU::ADC, &CPU::ABY, 4};
+    instructions[0x7D] = {"ADC", &CPU::ADC, &CPU::ABX, 4};
     instructions[0x81] = {"STA", &CPU::STA, &CPU::IZX, 6};
     instructions[0x84] = {"STY", &CPU::STY, &CPU::ZP, 3};
     instructions[0x85] = {"STA", &CPU::STA, &CPU::ZP, 3};
