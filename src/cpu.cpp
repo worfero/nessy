@@ -176,6 +176,34 @@ uint8_t CPU::STY(){
     return 0;
 }
 
+uint8_t CPU::TAX(){
+    registers.X = registers.A;
+    setFlag(ZERO, registers.X == 0);
+    setFlag(NEGATIVE, registers.X & 0x80);
+    return 0;
+}
+
+uint8_t CPU::TAY(){
+    registers.Y = registers.A;
+    setFlag(ZERO, registers.Y == 0);
+    setFlag(NEGATIVE, registers.Y & 0x80);
+    return 0;
+}
+
+uint8_t CPU::TXA(){
+    registers.A = registers.X;
+    setFlag(ZERO, registers.A == 0);
+    setFlag(NEGATIVE, registers.A & 0x80);
+    return 0;
+}
+
+uint8_t CPU::TYA(){
+    registers.A = registers.Y;
+    setFlag(ZERO, registers.A == 0);
+    setFlag(NEGATIVE, registers.A & 0x80);
+    return 0;
+}
+
 void CPU::fillOpcodes(){
     instructions.fill({"XXX", &CPU::XXX, &CPU::IMP, 2});
 
@@ -183,6 +211,7 @@ void CPU::fillOpcodes(){
     instructions[0x84] = {"STY", &CPU::STY, &CPU::ZP, 3};
     instructions[0x85] = {"STA", &CPU::STA, &CPU::ZP, 3};
     instructions[0x86] = {"STX", &CPU::STX, &CPU::ZP, 3};
+    instructions[0x8A] = {"TXA", &CPU::TXA, &CPU::IMP, 2};
     instructions[0x8C] = {"STY", &CPU::STY, &CPU::ABS, 4};
     instructions[0x8D] = {"STA", &CPU::STA, &CPU::ABS, 4};
     instructions[0x8E] = {"STX", &CPU::STX, &CPU::ABS, 4};
@@ -190,6 +219,7 @@ void CPU::fillOpcodes(){
     instructions[0x94] = {"STY", &CPU::STY, &CPU::ZPX, 4};
     instructions[0x95] = {"STA", &CPU::STA, &CPU::ZPX, 4};
     instructions[0x96] = {"STX", &CPU::STX, &CPU::ZPY, 4};
+    instructions[0x98] = {"TYA", &CPU::TYA, &CPU::IMP, 2};
     instructions[0x99] = {"STA", &CPU::STA, &CPU::ABY, 5};
     instructions[0x9D] = {"STA", &CPU::STA, &CPU::ABX, 5};
     instructions[0xA0] = {"LDY", &CPU::LDY, &CPU::IMM, 2};
@@ -198,7 +228,9 @@ void CPU::fillOpcodes(){
     instructions[0xA4] = {"LDY", &CPU::LDY, &CPU::ZP, 3};
     instructions[0xA5] = {"LDA", &CPU::LDA, &CPU::ZP, 3};
     instructions[0xA6] = {"LDX", &CPU::LDX, &CPU::ZP, 3};
+    instructions[0xA8] = {"TAY", &CPU::TAY, &CPU::IMP, 2};
     instructions[0xA9] = {"LDA", &CPU::LDA, &CPU::IMM, 2};
+    instructions[0xAA] = {"TAX", &CPU::TAX, &CPU::IMP, 2};
     instructions[0xAC] = {"LDY", &CPU::LDY, &CPU::ABS, 4};
     instructions[0xAD] = {"LDA", &CPU::LDA, &CPU::ABS, 4};
     instructions[0xAE] = {"LDX", &CPU::LDX, &CPU::ABS, 4};
@@ -280,7 +312,7 @@ void CPU::writeBus(uint16_t address, uint8_t data){
 }
 
 void CPU::printRegisters() const{
-    std::printf("--------Registers-------- \nA:%02X \nX:%02X \nY:%02X \nSP:%02X \nP:%02X \nPC:%04X\n\n",
+    std::printf("--------Registers-------- \nA: 0x%02X \nX: 0x%02X \nY: 0x%02X \nSP: 0x%02X \nP: 0x%02X \nPC: 0x%04X\n\n",
                 registers.A, registers.X, registers.Y, registers.SP, registers.P, registers.PC);
 }
 

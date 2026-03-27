@@ -88,6 +88,10 @@ private:
     uint8_t STA();
     uint8_t STX();
     uint8_t STY();
+    uint8_t TAX();
+    uint8_t TAY();
+    uint8_t TXA();
+    uint8_t TYA();
 
     void fillOpcodes();
 

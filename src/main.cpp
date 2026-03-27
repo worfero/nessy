@@ -16,30 +16,7 @@ int main(){
 
     nes.printCycleCounts();
     nes.printCpuRegisters();
-
-    nes.stepCpu();
-
-    nes.printCycleCounts();
-    nes.printCpuRegisters();
-    nes.printMemoryMap(0x0010, 1);
-
-    nes.stepCpu();
-
-    nes.printCycleCounts();
-    nes.printCpuRegisters();
-    nes.printMemoryMap(0x0010, 1);
-
-    nes.stepCpu();
-
-    nes.printCycleCounts();
-    nes.printCpuRegisters();
-    nes.printMemoryMap(0x1000, 1);
-
-    nes.stepCpu();
-
-    nes.printCycleCounts();
-    nes.printCpuRegisters();
-    nes.printMemoryMap(0x0020, 1);
+    nes.printCpuFlags();
 
     nes.stepCpu();
 
@@ -50,13 +27,29 @@ int main(){
 
     nes.printCycleCounts();
     nes.printCpuRegisters();
-    nes.printMemoryMap(0x0020, 1);
+    nes.printCpuFlags();
 
     nes.stepCpu();
 
     nes.printCycleCounts();
     nes.printCpuRegisters();
-    nes.printMemoryMap(0x1400, 1); 
+
+    nes.stepCpu();
+
+    nes.printCycleCounts();
+    nes.printCpuRegisters();
+
+    nes.stepCpu();
+
+    nes.printCycleCounts();
+    nes.printCpuRegisters();
+    nes.printCpuFlags();
+
+    nes.stepCpu();
+
+    nes.printCycleCounts();
+    nes.printCpuRegisters();
+    nes.printCpuFlags();
 
     return 0;
 }
