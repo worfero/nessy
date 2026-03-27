@@ -166,14 +166,30 @@ uint8_t CPU::STA(){
     return 0;
 }
 
+uint8_t CPU::STX(){
+    bus.write(fetchAddr, registers.X);
+    return 0;
+}
+
+uint8_t CPU::STY(){
+    bus.write(fetchAddr, registers.Y);
+    return 0;
+}
+
 void CPU::fillOpcodes(){
     instructions.fill({"XXX", &CPU::XXX, &CPU::IMP, 2});
 
     instructions[0x81] = {"STA", &CPU::STA, &CPU::IZX, 6};
+    instructions[0x84] = {"STY", &CPU::STY, &CPU::ZP, 3};
     instructions[0x85] = {"STA", &CPU::STA, &CPU::ZP, 3};
+    instructions[0x86] = {"STX", &CPU::STX, &CPU::ZP, 3};
+    instructions[0x8C] = {"STY", &CPU::STY, &CPU::ABS, 4};
     instructions[0x8D] = {"STA", &CPU::STA, &CPU::ABS, 4};
+    instructions[0x8E] = {"STX", &CPU::STX, &CPU::ABS, 4};
     instructions[0x91] = {"STA", &CPU::STA, &CPU::IZY, 6};
+    instructions[0x94] = {"STY", &CPU::STY, &CPU::ZPX, 4};
     instructions[0x95] = {"STA", &CPU::STA, &CPU::ZPX, 4};
+    instructions[0x96] = {"STX", &CPU::STX, &CPU::ZPY, 4};
     instructions[0x99] = {"STA", &CPU::STA, &CPU::ABY, 5};
     instructions[0x9D] = {"STA", &CPU::STA, &CPU::ABX, 5};
     instructions[0xA0] = {"LDY", &CPU::LDY, &CPU::IMM, 2};
@@ -228,8 +244,6 @@ void CPU::reset(){
     uint16_t reset_lo = bus.read(0xFFFC);
     uint16_t reset_hi = bus.read(0xFFFD);
     registers.PC = (reset_hi << 8) | reset_lo;
-
-    std::printf("\n\n\n%u\n\n\n", reset_hi);
 
     fetchedValue = 0;
     fetchAddr = 0;

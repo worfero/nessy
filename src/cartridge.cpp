@@ -24,8 +24,6 @@ bool Cartridge::loadRomFile(const std::string &filename){
 
     uint8_t prgRomSize = (uint8_t)header[4];
 
-    printf("ROM size: %u\n", prgRomSize);
-
     memory.resize(prgRomSize * 0x4000);
     file.read((char*)memory.data(), memory.size());
 
