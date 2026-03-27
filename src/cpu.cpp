@@ -204,6 +204,42 @@ uint8_t CPU::TYA(){
     return 0;
 }
 
+uint8_t CPU::INX(){
+    // uint8_t automatically wraps 0xFF to 0x00
+    registers.X++;
+    setFlag(ZERO, registers.X == 0);
+    setFlag(NEGATIVE, registers.X & 0x80);
+
+    return 0;
+}
+
+uint8_t CPU::INY(){
+    // uint8_t automatically wraps 0xFF to 0x00
+    registers.Y++;
+    setFlag(ZERO, registers.Y == 0);
+    setFlag(NEGATIVE, registers.Y & 0x80);
+
+    return 0;
+}
+
+uint8_t CPU::DEX(){
+    // uint8_t automatically wraps 0x00 to 0xFF
+    registers.X--;
+    setFlag(ZERO, registers.X == 0);
+    setFlag(NEGATIVE, registers.X & 0x80);
+
+    return 0;
+}
+
+uint8_t CPU::DEY(){
+    // uint8_t automatically wraps 0x00 to 0xFF
+    registers.Y--;
+    setFlag(ZERO, registers.Y == 0);
+    setFlag(NEGATIVE, registers.Y & 0x80);
+
+    return 0;
+}
+
 void CPU::fillOpcodes(){
     instructions.fill({"XXX", &CPU::XXX, &CPU::IMP, 2});
 
@@ -211,6 +247,7 @@ void CPU::fillOpcodes(){
     instructions[0x84] = {"STY", &CPU::STY, &CPU::ZP, 3};
     instructions[0x85] = {"STA", &CPU::STA, &CPU::ZP, 3};
     instructions[0x86] = {"STX", &CPU::STX, &CPU::ZP, 3};
+    instructions[0x88] = {"DEY", &CPU::DEY, &CPU::IMP, 2};
     instructions[0x8A] = {"TXA", &CPU::TXA, &CPU::IMP, 2};
     instructions[0x8C] = {"STY", &CPU::STY, &CPU::ABS, 4};
     instructions[0x8D] = {"STA", &CPU::STA, &CPU::ABS, 4};
@@ -242,6 +279,9 @@ void CPU::fillOpcodes(){
     instructions[0xBC] = {"LDY", &CPU::LDY, &CPU::ABX, 4};
     instructions[0xBD] = {"LDA", &CPU::LDA, &CPU::ABX, 4};
     instructions[0xBE] = {"LDX", &CPU::LDX, &CPU::ABY, 4};
+    instructions[0xC8] = {"INY", &CPU::INY, &CPU::IMP, 2};
+    instructions[0xCA] = {"DEX", &CPU::DEX, &CPU::IMP, 2};
+    instructions[0xE8] = {"INX", &CPU::INX, &CPU::IMP, 2};
 }
 
 uint8_t CPU::fetchValue(){
