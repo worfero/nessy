@@ -246,6 +246,12 @@ uint8_t CPU::CLC(){
     return 0;
 }
 
+uint8_t CPU::SEC(){
+    setFlag(CARRY, 1);
+
+    return 0;
+}
+
 uint8_t CPU::ADC(){
     uint8_t addValue = fetchValue();
     uint16_t result = registers.A + addValue + getFlag(CARRY);
@@ -277,10 +283,44 @@ uint8_t CPU::SBC(){
     return 1;
 }
 
+uint8_t CPU::CMP(){
+    uint8_t subValue = fetchValue();
+    uint16_t result = registers.A - subValue;
+
+    setFlag(CARRY, registers.A >= subValue);
+    setFlag(ZERO, (result & 0xFF) == 0);
+    setFlag(NEGATIVE, result & 0x80);
+
+    return 1;
+}
+
+uint8_t CPU::CPX(){
+    uint8_t subValue = fetchValue();
+    uint16_t result = registers.X - subValue;
+
+    setFlag(CARRY, registers.X >= subValue);
+    setFlag(ZERO, (result & 0xFF) == 0);
+    setFlag(NEGATIVE, result & 0x80);
+
+    return 0;
+}
+
+uint8_t CPU::CPY(){
+    uint8_t subValue = fetchValue();
+    uint16_t result = registers.Y - subValue;
+
+    setFlag(CARRY, registers.Y >= subValue);
+    setFlag(ZERO, (result & 0xFF) == 0);
+    setFlag(NEGATIVE, result & 0x80);
+
+    return 0;
+}
+
 void CPU::fillOpcodes(){
     instructions.fill({"XXX", &CPU::XXX, &CPU::IMP, 2});
 
     instructions[0x18] = {"CLC", &CPU::CLC, &CPU::IMP, 2};
+    instructions[0x38] = {"SEC", &CPU::SEC, &CPU::IMP, 2};
     instructions[0x61] = {"ADC", &CPU::ADC, &CPU::IZX, 6};
     instructions[0x65] = {"ADC", &CPU::ADC, &CPU::ZP, 3};
     instructions[0x69] = {"ADC", &CPU::ADC, &CPU::IMM, 2};
@@ -325,12 +365,26 @@ void CPU::fillOpcodes(){
     instructions[0xBC] = {"LDY", &CPU::LDY, &CPU::ABX, 4};
     instructions[0xBD] = {"LDA", &CPU::LDA, &CPU::ABX, 4};
     instructions[0xBE] = {"LDX", &CPU::LDX, &CPU::ABY, 4};
+    instructions[0xC0] = {"CPY", &CPU::CPY, &CPU::IMM, 2};
+    instructions[0xC1] = {"CMP", &CPU::CMP, &CPU::INX, 6};
+    instructions[0xC4] = {"CPY", &CPU::CPY, &CPU::ZP, 3};
+    instructions[0xC5] = {"CMP", &CPU::CMP, &CPU::ZP, 3};
     instructions[0xC8] = {"INY", &CPU::INY, &CPU::IMP, 2};
+    instructions[0xC9] = {"CMP", &CPU::CMP, &CPU::IMM, 2};
     instructions[0xCA] = {"DEX", &CPU::DEX, &CPU::IMP, 2};
+    instructions[0xCC] = {"CPY", &CPU::CPY, &CPU::ABS, 4};
+    instructions[0xCD] = {"CMP", &CPU::CMP, &CPU::ABS, 4};
+    instructions[0xD1] = {"CMP", &CPU::CMP, &CPU::INY, 5};
+    instructions[0xD5] = {"CMP", &CPU::CMP, &CPU::ZPX, 4};
+    instructions[0xD9] = {"CMP", &CPU::CMP, &CPU::ABY, 4};
+    instructions[0xDD] = {"CMP", &CPU::CMP, &CPU::ABX, 4};
+    instructions[0xE0] = {"CPX", &CPU::CPX, &CPU::IMM, 2};
     instructions[0xE1] = {"SBC", &CPU::SBC, &CPU::IZX, 6};
+    instructions[0xE4] = {"CPX", &CPU::CPX, &CPU::ZP, 3};
     instructions[0xE5] = {"SBC", &CPU::SBC, &CPU::ZP, 3};
     instructions[0xE8] = {"INX", &CPU::INX, &CPU::IMP, 2};
     instructions[0xE9] = {"SBC", &CPU::SBC, &CPU::IMM, 2};
+    instructions[0xEC] = {"CPX", &CPU::CPX, &CPU::ABS, 4};
     instructions[0xED] = {"SBC", &CPU::SBC, &CPU::ABS, 4};
     instructions[0xF1] = {"SBC", &CPU::SBC, &CPU::IZY, 5};
     instructions[0xF5] = {"SBC", &CPU::SBC, &CPU::ZPX, 4};

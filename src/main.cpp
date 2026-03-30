@@ -7,21 +7,12 @@ int main(){
     nes.printCycleCounts();
     nes.printCpuRegisters();
 
-    nes.stepCpu();
-
-    nes.printCycleCounts();
-    nes.printCpuRegisters();
-    
-    nes.stepCpu();
-
-    nes.printCycleCounts();
-    nes.printCpuRegisters();
-
-    nes.stepCpu();
-
-    nes.printCycleCounts();
-    nes.printCpuRegisters();
-    nes.printCpuFlags();
+    for(int i = 0; i < 8; i++){
+        nes.stepCpu();
+        nes.printCycleCounts();
+        nes.printCpuRegisters();
+        nes.printCpuFlags();
+    }
 
     return 0;
 }

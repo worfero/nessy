@@ -97,8 +97,12 @@ private:
     uint8_t DEX();
     uint8_t DEY();
     uint8_t CLC();
+    uint8_t SEC();
     uint8_t ADC();
     uint8_t SBC();
+    uint8_t CMP();
+    uint8_t CPX();
+    uint8_t CPY();
 
     void fillOpcodes();
 
