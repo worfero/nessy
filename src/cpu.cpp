@@ -262,6 +262,21 @@ uint8_t CPU::ADC(){
     return 1;
 }
 
+uint8_t CPU::SBC(){
+    uint8_t subValue = fetchValue() ^ 0xFF; // the fetchValue gets sign inverted so the operand is multiplied by -1 and the same logic from ADC can be used
+    uint16_t result = registers.A + subValue + getFlag(CARRY);
+
+    bool isOverflow = ((~(registers.A ^ subValue) & (registers.A ^ result)) & 0x80) != 0;
+    registers.A = result & 0x00FF;
+
+    setFlag(CARRY, result > 0xFF);
+    setFlag(ZERO, registers.A == 0);
+    setFlag(NEGATIVE, registers.A & 0x80);
+    setFlag(OVERFLOW, isOverflow);
+
+    return 1;
+}
+
 void CPU::fillOpcodes(){
     instructions.fill({"XXX", &CPU::XXX, &CPU::IMP, 2});
 
@@ -312,7 +327,15 @@ void CPU::fillOpcodes(){
     instructions[0xBE] = {"LDX", &CPU::LDX, &CPU::ABY, 4};
     instructions[0xC8] = {"INY", &CPU::INY, &CPU::IMP, 2};
     instructions[0xCA] = {"DEX", &CPU::DEX, &CPU::IMP, 2};
+    instructions[0xE1] = {"SBC", &CPU::SBC, &CPU::IZX, 6};
+    instructions[0xE5] = {"SBC", &CPU::SBC, &CPU::ZP, 3};
     instructions[0xE8] = {"INX", &CPU::INX, &CPU::IMP, 2};
+    instructions[0xE9] = {"SBC", &CPU::SBC, &CPU::IMM, 2};
+    instructions[0xED] = {"SBC", &CPU::SBC, &CPU::ABS, 4};
+    instructions[0xF1] = {"SBC", &CPU::SBC, &CPU::IZY, 5};
+    instructions[0xF5] = {"SBC", &CPU::SBC, &CPU::ZPX, 4};
+    instructions[0xF9] = {"SBC", &CPU::SBC, &CPU::ABY, 4};
+    instructions[0xFD] = {"SBC", &CPU::SBC, &CPU::ABX, 4};
 }
 
 uint8_t CPU::fetchValue(){

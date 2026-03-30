@@ -98,6 +98,7 @@ private:
     uint8_t DEY();
     uint8_t CLC();
     uint8_t ADC();
+    uint8_t SBC();
 
     void fillOpcodes();
 
