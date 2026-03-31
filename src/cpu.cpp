@@ -316,80 +316,95 @@ uint8_t CPU::CPY(){
     return 0;
 }
 
-void CPU::fillOpcodes(){
-    instructions.fill({"XXX", &CPU::XXX, &CPU::IMP, 2});
+uint8_t CPU::BEQ(){
+    if(getFlag(ZERO)){
+        uint8_t extraCycles = 1;
+        if((fetchAddr & 0xFF00) != (registers.PC & 0xFF00)){
+            extraCycles++;
+        }
 
-    instructions[0x18] = {"CLC", &CPU::CLC, &CPU::IMP, 2};
-    instructions[0x38] = {"SEC", &CPU::SEC, &CPU::IMP, 2};
-    instructions[0x61] = {"ADC", &CPU::ADC, &CPU::IZX, 6};
-    instructions[0x65] = {"ADC", &CPU::ADC, &CPU::ZP, 3};
-    instructions[0x69] = {"ADC", &CPU::ADC, &CPU::IMM, 2};
-    instructions[0x6D] = {"ADC", &CPU::ADC, &CPU::ABS, 4};
-    instructions[0x71] = {"ADC", &CPU::ADC, &CPU::IZY, 5};
-    instructions[0x75] = {"ADC", &CPU::ADC, &CPU::ZPX, 4};
-    instructions[0x79] = {"ADC", &CPU::ADC, &CPU::ABY, 4};
-    instructions[0x7D] = {"ADC", &CPU::ADC, &CPU::ABX, 4};
-    instructions[0x81] = {"STA", &CPU::STA, &CPU::IZX, 6};
-    instructions[0x84] = {"STY", &CPU::STY, &CPU::ZP, 3};
-    instructions[0x85] = {"STA", &CPU::STA, &CPU::ZP, 3};
-    instructions[0x86] = {"STX", &CPU::STX, &CPU::ZP, 3};
-    instructions[0x88] = {"DEY", &CPU::DEY, &CPU::IMP, 2};
-    instructions[0x8A] = {"TXA", &CPU::TXA, &CPU::IMP, 2};
-    instructions[0x8C] = {"STY", &CPU::STY, &CPU::ABS, 4};
-    instructions[0x8D] = {"STA", &CPU::STA, &CPU::ABS, 4};
-    instructions[0x8E] = {"STX", &CPU::STX, &CPU::ABS, 4};
-    instructions[0x91] = {"STA", &CPU::STA, &CPU::IZY, 6};
-    instructions[0x94] = {"STY", &CPU::STY, &CPU::ZPX, 4};
-    instructions[0x95] = {"STA", &CPU::STA, &CPU::ZPX, 4};
-    instructions[0x96] = {"STX", &CPU::STX, &CPU::ZPY, 4};
-    instructions[0x98] = {"TYA", &CPU::TYA, &CPU::IMP, 2};
-    instructions[0x99] = {"STA", &CPU::STA, &CPU::ABY, 5};
-    instructions[0x9D] = {"STA", &CPU::STA, &CPU::ABX, 5};
-    instructions[0xA0] = {"LDY", &CPU::LDY, &CPU::IMM, 2};
-    instructions[0xA1] = {"LDA", &CPU::LDA, &CPU::IZX, 6};
-    instructions[0xA2] = {"LDX", &CPU::LDX, &CPU::IMM, 2};
-    instructions[0xA4] = {"LDY", &CPU::LDY, &CPU::ZP, 3};
-    instructions[0xA5] = {"LDA", &CPU::LDA, &CPU::ZP, 3};
-    instructions[0xA6] = {"LDX", &CPU::LDX, &CPU::ZP, 3};
-    instructions[0xA8] = {"TAY", &CPU::TAY, &CPU::IMP, 2};
-    instructions[0xA9] = {"LDA", &CPU::LDA, &CPU::IMM, 2};
-    instructions[0xAA] = {"TAX", &CPU::TAX, &CPU::IMP, 2};
-    instructions[0xAC] = {"LDY", &CPU::LDY, &CPU::ABS, 4};
-    instructions[0xAD] = {"LDA", &CPU::LDA, &CPU::ABS, 4};
-    instructions[0xAE] = {"LDX", &CPU::LDX, &CPU::ABS, 4};
-    instructions[0xB1] = {"LDA", &CPU::LDA, &CPU::IZY, 5};
-    instructions[0xB4] = {"LDY", &CPU::LDY, &CPU::ZPX, 4};
-    instructions[0xB5] = {"LDA", &CPU::LDA, &CPU::ZPX, 4};
-    instructions[0xB6] = {"LDX", &CPU::LDX, &CPU::ZPY, 4};
-    instructions[0xB9] = {"LDA", &CPU::LDA, &CPU::ABY, 4};
-    instructions[0xBC] = {"LDY", &CPU::LDY, &CPU::ABX, 4};
-    instructions[0xBD] = {"LDA", &CPU::LDA, &CPU::ABX, 4};
-    instructions[0xBE] = {"LDX", &CPU::LDX, &CPU::ABY, 4};
-    instructions[0xC0] = {"CPY", &CPU::CPY, &CPU::IMM, 2};
-    instructions[0xC1] = {"CMP", &CPU::CMP, &CPU::INX, 6};
-    instructions[0xC4] = {"CPY", &CPU::CPY, &CPU::ZP, 3};
-    instructions[0xC5] = {"CMP", &CPU::CMP, &CPU::ZP, 3};
-    instructions[0xC8] = {"INY", &CPU::INY, &CPU::IMP, 2};
-    instructions[0xC9] = {"CMP", &CPU::CMP, &CPU::IMM, 2};
-    instructions[0xCA] = {"DEX", &CPU::DEX, &CPU::IMP, 2};
-    instructions[0xCC] = {"CPY", &CPU::CPY, &CPU::ABS, 4};
-    instructions[0xCD] = {"CMP", &CPU::CMP, &CPU::ABS, 4};
-    instructions[0xD1] = {"CMP", &CPU::CMP, &CPU::INY, 5};
-    instructions[0xD5] = {"CMP", &CPU::CMP, &CPU::ZPX, 4};
-    instructions[0xD9] = {"CMP", &CPU::CMP, &CPU::ABY, 4};
-    instructions[0xDD] = {"CMP", &CPU::CMP, &CPU::ABX, 4};
-    instructions[0xE0] = {"CPX", &CPU::CPX, &CPU::IMM, 2};
-    instructions[0xE1] = {"SBC", &CPU::SBC, &CPU::IZX, 6};
-    instructions[0xE4] = {"CPX", &CPU::CPX, &CPU::ZP, 3};
-    instructions[0xE5] = {"SBC", &CPU::SBC, &CPU::ZP, 3};
-    instructions[0xE8] = {"INX", &CPU::INX, &CPU::IMP, 2};
-    instructions[0xE9] = {"SBC", &CPU::SBC, &CPU::IMM, 2};
-    instructions[0xEC] = {"CPX", &CPU::CPX, &CPU::ABS, 4};
-    instructions[0xED] = {"SBC", &CPU::SBC, &CPU::ABS, 4};
-    instructions[0xF1] = {"SBC", &CPU::SBC, &CPU::IZY, 5};
-    instructions[0xF5] = {"SBC", &CPU::SBC, &CPU::ZPX, 4};
-    instructions[0xF9] = {"SBC", &CPU::SBC, &CPU::ABY, 4};
-    instructions[0xFD] = {"SBC", &CPU::SBC, &CPU::ABX, 4};
+        registers.PC = fetchAddr;
+        return extraCycles;
+    }
+
+    return 0;
+}
+
+void CPU::fillOpcodes(){
+    instructions.fill({"XXX", &CPU::XXX, &CPU::IMP, 2, false});
+
+    instructions[0x18] = {"CLC", &CPU::CLC, &CPU::IMP, 2, false};
+    instructions[0x38] = {"SEC", &CPU::SEC, &CPU::IMP, 2, false};
+    instructions[0x61] = {"ADC", &CPU::ADC, &CPU::IZX, 6, false};
+    instructions[0x65] = {"ADC", &CPU::ADC, &CPU::ZP, 3, false};
+    instructions[0x69] = {"ADC", &CPU::ADC, &CPU::IMM, 2, false};
+    instructions[0x6D] = {"ADC", &CPU::ADC, &CPU::ABS, 4, false};
+    instructions[0x71] = {"ADC", &CPU::ADC, &CPU::IZY, 5, false};
+    instructions[0x75] = {"ADC", &CPU::ADC, &CPU::ZPX, 4, false};
+    instructions[0x79] = {"ADC", &CPU::ADC, &CPU::ABY, 4, false};
+    instructions[0x7D] = {"ADC", &CPU::ADC, &CPU::ABX, 4, false};
+    instructions[0x81] = {"STA", &CPU::STA, &CPU::IZX, 6, false};
+    instructions[0x84] = {"STY", &CPU::STY, &CPU::ZP, 3, false};
+    instructions[0x85] = {"STA", &CPU::STA, &CPU::ZP, 3, false};
+    instructions[0x86] = {"STX", &CPU::STX, &CPU::ZP, 3, false};
+    instructions[0x88] = {"DEY", &CPU::DEY, &CPU::IMP, 2, false};
+    instructions[0x8A] = {"TXA", &CPU::TXA, &CPU::IMP, 2, false};
+    instructions[0x8C] = {"STY", &CPU::STY, &CPU::ABS, 4, false};
+    instructions[0x8D] = {"STA", &CPU::STA, &CPU::ABS, 4, false};
+    instructions[0x8E] = {"STX", &CPU::STX, &CPU::ABS, 4, false};
+    instructions[0x91] = {"STA", &CPU::STA, &CPU::IZY, 6, false};
+    instructions[0x94] = {"STY", &CPU::STY, &CPU::ZPX, 4, false};
+    instructions[0x95] = {"STA", &CPU::STA, &CPU::ZPX, 4, false};
+    instructions[0x96] = {"STX", &CPU::STX, &CPU::ZPY, 4, false};
+    instructions[0x98] = {"TYA", &CPU::TYA, &CPU::IMP, 2, false};
+    instructions[0x99] = {"STA", &CPU::STA, &CPU::ABY, 5, false};
+    instructions[0x9D] = {"STA", &CPU::STA, &CPU::ABX, 5, false};
+    instructions[0xA0] = {"LDY", &CPU::LDY, &CPU::IMM, 2, false};
+    instructions[0xA1] = {"LDA", &CPU::LDA, &CPU::IZX, 6, false};
+    instructions[0xA2] = {"LDX", &CPU::LDX, &CPU::IMM, 2, false};
+    instructions[0xA4] = {"LDY", &CPU::LDY, &CPU::ZP, 3, false};
+    instructions[0xA5] = {"LDA", &CPU::LDA, &CPU::ZP, 3, false};
+    instructions[0xA6] = {"LDX", &CPU::LDX, &CPU::ZP, 3, false};
+    instructions[0xA8] = {"TAY", &CPU::TAY, &CPU::IMP, 2, false};
+    instructions[0xA9] = {"LDA", &CPU::LDA, &CPU::IMM, 2, false};
+    instructions[0xAA] = {"TAX", &CPU::TAX, &CPU::IMP, 2, false};
+    instructions[0xAC] = {"LDY", &CPU::LDY, &CPU::ABS, 4, false};
+    instructions[0xAD] = {"LDA", &CPU::LDA, &CPU::ABS, 4, false};
+    instructions[0xAE] = {"LDX", &CPU::LDX, &CPU::ABS, 4, false};
+    instructions[0xB1] = {"LDA", &CPU::LDA, &CPU::IZY, 5, false};
+    instructions[0xB4] = {"LDY", &CPU::LDY, &CPU::ZPX, 4, false};
+    instructions[0xB5] = {"LDA", &CPU::LDA, &CPU::ZPX, 4, false};
+    instructions[0xB6] = {"LDX", &CPU::LDX, &CPU::ZPY, 4, false};
+    instructions[0xB9] = {"LDA", &CPU::LDA, &CPU::ABY, 4, false};
+    instructions[0xBC] = {"LDY", &CPU::LDY, &CPU::ABX, 4, false};
+    instructions[0xBD] = {"LDA", &CPU::LDA, &CPU::ABX, 4, false};
+    instructions[0xBE] = {"LDX", &CPU::LDX, &CPU::ABY, 4, false};
+    instructions[0xC0] = {"CPY", &CPU::CPY, &CPU::IMM, 2, false};
+    instructions[0xC1] = {"CMP", &CPU::CMP, &CPU::INX, 6, false};
+    instructions[0xC4] = {"CPY", &CPU::CPY, &CPU::ZP, 3, false};
+    instructions[0xC5] = {"CMP", &CPU::CMP, &CPU::ZP, 3, false};
+    instructions[0xC8] = {"INY", &CPU::INY, &CPU::IMP, 2, false};
+    instructions[0xC9] = {"CMP", &CPU::CMP, &CPU::IMM, 2, false};
+    instructions[0xCA] = {"DEX", &CPU::DEX, &CPU::IMP, 2, false};
+    instructions[0xCC] = {"CPY", &CPU::CPY, &CPU::ABS, 4, false};
+    instructions[0xCD] = {"CMP", &CPU::CMP, &CPU::ABS, 4, false};
+    instructions[0xD1] = {"CMP", &CPU::CMP, &CPU::INY, 5, false};
+    instructions[0xD5] = {"CMP", &CPU::CMP, &CPU::ZPX, 4, false};
+    instructions[0xD9] = {"CMP", &CPU::CMP, &CPU::ABY, 4, false};
+    instructions[0xDD] = {"CMP", &CPU::CMP, &CPU::ABX, 4, false};
+    instructions[0xE0] = {"CPX", &CPU::CPX, &CPU::IMM, 2, false};
+    instructions[0xE1] = {"SBC", &CPU::SBC, &CPU::IZX, 6, false};
+    instructions[0xE4] = {"CPX", &CPU::CPX, &CPU::ZP, 3, false};
+    instructions[0xE5] = {"SBC", &CPU::SBC, &CPU::ZP, 3, false};
+    instructions[0xE8] = {"INX", &CPU::INX, &CPU::IMP, 2, false};
+    instructions[0xE9] = {"SBC", &CPU::SBC, &CPU::IMM, 2, false};
+    instructions[0xEC] = {"CPX", &CPU::CPX, &CPU::ABS, 4, false};
+    instructions[0xED] = {"SBC", &CPU::SBC, &CPU::ABS, 4, false};
+    instructions[0xF0] = {"BEQ", &CPU::BEQ, &CPU::REL, 2, true};
+    instructions[0xF1] = {"SBC", &CPU::SBC, &CPU::IZY, 5, false};
+    instructions[0xF5] = {"SBC", &CPU::SBC, &CPU::ZPX, 4, false};
+    instructions[0xF9] = {"SBC", &CPU::SBC, &CPU::ABY, 4, false};
+    instructions[0xFD] = {"SBC", &CPU::SBC, &CPU::ABX, 4, false};
 }
 
 uint8_t CPU::fetchValue(){
@@ -409,7 +424,12 @@ void CPU::clock(){
         uint8_t extraCycleCheck1 = (this->*instruction.addrMode)();
         uint8_t extraCycleCheck2 = (this->*instruction.operation)();
 
-        instructionCycles += (extraCycleCheck1 & extraCycleCheck2);
+        if(instruction.isBranch){
+            instructionCycles += extraCycleCheck2;
+        }
+        else{
+            instructionCycles += (extraCycleCheck1 & extraCycleCheck2);
+        }
     }
 
     instructionCycles--;

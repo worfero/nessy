@@ -1,7 +1,6 @@
 SRC_DIR = src
 OBJ_DIR = build
 INCLUDE_DIR = include
-ASSEMBLER_SRC = asm
 
 CC = g++
 CFLAGS = -Wall -I$(INCLUDE_DIR)

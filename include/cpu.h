@@ -49,6 +49,7 @@ private:
         uint8_t (CPU::*operation)(void);
         uint8_t (CPU::*addrMode)(void);
         uint8_t cycleCount;
+        bool isBranch;
     };
 
     // instruction lookup table
@@ -103,6 +104,7 @@ private:
     uint8_t CMP();
     uint8_t CPX();
     uint8_t CPY();
+    uint8_t BEQ();
 
     void fillOpcodes();
 
