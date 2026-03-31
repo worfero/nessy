@@ -105,6 +105,13 @@ private:
     uint8_t CPX();
     uint8_t CPY();
     uint8_t BEQ();
+    uint8_t BNE();
+    uint8_t BCC();
+    uint8_t BCS();
+    uint8_t BMI();
+    uint8_t BPL();
+    uint8_t BVC();
+    uint8_t BVS();
 
     void fillOpcodes();
 
