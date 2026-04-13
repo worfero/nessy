@@ -204,6 +204,18 @@ uint8_t CPU::TYA(){
     return 0;
 }
 
+uint8_t CPU::TSX(){
+    registers.X = registers.SP;
+    setFlag(ZERO, registers.X == 0);
+    setFlag(NEGATIVE, registers.X & 0x80);
+    return 0;
+}
+
+uint8_t CPU::TXS(){
+    registers.SP = registers.X;
+    return 0;
+}
+
 uint8_t CPU::INX(){
     // uint8_t automatically wraps 0xFF to 0x00
     registers.X++;
@@ -490,6 +502,7 @@ void CPU::fillOpcodes(){
     instructions[0x96] = {"STX", &CPU::STX, &CPU::ZPY, 4, false};
     instructions[0x98] = {"TYA", &CPU::TYA, &CPU::IMP, 2, false};
     instructions[0x99] = {"STA", &CPU::STA, &CPU::ABY, 5, false};
+    instructions[0x9A] = {"TXS", &CPU::TXS, &CPU::IMP, 2, false};
     instructions[0x9D] = {"STA", &CPU::STA, &CPU::ABX, 5, false};
     instructions[0xA0] = {"LDY", &CPU::LDY, &CPU::IMM, 2, false};
     instructions[0xA1] = {"LDA", &CPU::LDA, &CPU::IZX, 6, false};
@@ -509,6 +522,7 @@ void CPU::fillOpcodes(){
     instructions[0xB5] = {"LDA", &CPU::LDA, &CPU::ZPX, 4, false};
     instructions[0xB6] = {"LDX", &CPU::LDX, &CPU::ZPY, 4, false};
     instructions[0xB9] = {"LDA", &CPU::LDA, &CPU::ABY, 4, false};
+    instructions[0xBA] = {"TSX", &CPU::TSX, &CPU::IMP, 2, false};
     instructions[0xBC] = {"LDY", &CPU::LDY, &CPU::ABX, 4, false};
     instructions[0xBD] = {"LDA", &CPU::LDA, &CPU::ABX, 4, false};
     instructions[0xBE] = {"LDX", &CPU::LDX, &CPU::ABY, 4, false};

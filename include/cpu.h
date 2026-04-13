@@ -97,6 +97,8 @@ private:
     uint8_t TAY();
     uint8_t TXA();
     uint8_t TYA();
+    uint8_t TSX();
+    uint8_t TXS();
     uint8_t INX();
     uint8_t INY();
     uint8_t DEX();

@@ -14,7 +14,5 @@ int main(){
         nes.printCpuFlags();
     }
 
-    nes.printMemoryMap(0x01FD, 1);
-
     return 0;
 }
