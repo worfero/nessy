@@ -66,6 +66,10 @@ private:
     uint8_t fetchedValue = 0;
     uint16_t fetchAddr = 0;
 
+    // stack functions
+    void push(uint8_t value);
+    uint8_t pop();
+
     // addressing modes
     uint8_t IMP();
     uint8_t ACC();
@@ -113,6 +117,8 @@ private:
     uint8_t BVC();
     uint8_t BVS();
     uint8_t JMP();
+    uint8_t JSR();
+    uint8_t RTS();
 
     void fillOpcodes();
 

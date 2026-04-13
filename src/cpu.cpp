@@ -434,15 +434,36 @@ uint8_t CPU::JMP(){
     return 0;
 }
 
+uint8_t CPU::JSR(){
+    uint16_t returnPC = registers.PC - 1;
+    uint8_t loByte = returnPC & 0xFF;
+    uint8_t hiByte = (returnPC >> 8) & 0xFF;
+    push(hiByte);
+    push(loByte);
+    registers.PC = fetchAddr;
+
+    return 0;
+}
+
+uint8_t CPU::RTS(){
+    uint8_t loByte = pop();
+    uint8_t hiByte = pop();
+    registers.PC = ((hiByte << 8) | loByte) + 1;
+
+    return 0;
+}
+
 void CPU::fillOpcodes(){
     instructions.fill({"XXX", &CPU::XXX, &CPU::IMP, 2, false});
 
     instructions[0x10] = {"BPL", &CPU::BPL, &CPU::REL, 2, true};
     instructions[0x18] = {"CLC", &CPU::CLC, &CPU::IMP, 2, false};
+    instructions[0x20] = {"JSR", &CPU::JSR, &CPU::ABS, 6, false};
     instructions[0x30] = {"BMI", &CPU::BMI, &CPU::REL, 2, true};
     instructions[0x38] = {"SEC", &CPU::SEC, &CPU::IMP, 2, false};
     instructions[0x4C] = {"JMP", &CPU::JMP, &CPU::ABS, 3, false};
     instructions[0x50] = {"BVC", &CPU::BVC, &CPU::REL, 2, true};
+    instructions[0x60] = {"RTS", &CPU::RTS, &CPU::IMP, 6, false};
     instructions[0x61] = {"ADC", &CPU::ADC, &CPU::IZX, 6, false};
     instructions[0x65] = {"ADC", &CPU::ADC, &CPU::ZP, 3, false};
     instructions[0x69] = {"ADC", &CPU::ADC, &CPU::IMM, 2, false};
@@ -524,6 +545,14 @@ uint8_t CPU::fetchValue(){
     if (!(instructions[opcode].addrMode == &CPU::IMP))
         fetchedValue = bus.read(fetchAddr);
     return fetchedValue;
+}
+
+void CPU::push(uint8_t value){
+    bus.write(0x0100 | registers.SP--, value);
+}
+
+uint8_t CPU::pop(){
+    return bus.read(0x0100 | ++registers.SP);
 }
 
 void CPU::clock(){
