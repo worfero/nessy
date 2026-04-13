@@ -112,6 +112,7 @@ private:
     uint8_t BPL();
     uint8_t BVC();
     uint8_t BVS();
+    uint8_t JMP();
 
     void fillOpcodes();
 

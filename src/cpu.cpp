@@ -428,6 +428,12 @@ uint8_t CPU::BVS(){
     return 0;
 }
 
+uint8_t CPU::JMP(){
+    registers.PC = fetchAddr;
+
+    return 0;
+}
+
 void CPU::fillOpcodes(){
     instructions.fill({"XXX", &CPU::XXX, &CPU::IMP, 2, false});
 
@@ -435,10 +441,12 @@ void CPU::fillOpcodes(){
     instructions[0x18] = {"CLC", &CPU::CLC, &CPU::IMP, 2, false};
     instructions[0x30] = {"BMI", &CPU::BMI, &CPU::REL, 2, true};
     instructions[0x38] = {"SEC", &CPU::SEC, &CPU::IMP, 2, false};
+    instructions[0x4C] = {"JMP", &CPU::JMP, &CPU::ABS, 3, false};
     instructions[0x50] = {"BVC", &CPU::BVC, &CPU::REL, 2, true};
     instructions[0x61] = {"ADC", &CPU::ADC, &CPU::IZX, 6, false};
     instructions[0x65] = {"ADC", &CPU::ADC, &CPU::ZP, 3, false};
     instructions[0x69] = {"ADC", &CPU::ADC, &CPU::IMM, 2, false};
+    instructions[0x6C] = {"JMP", &CPU::JMP, &CPU::IND, 5, false};
     instructions[0x6D] = {"ADC", &CPU::ADC, &CPU::ABS, 4, false};
     instructions[0x70] = {"BVS", &CPU::BVC, &CPU::REL, 2, true};
     instructions[0x71] = {"ADC", &CPU::ADC, &CPU::IZY, 5, false};
