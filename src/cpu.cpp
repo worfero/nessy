@@ -465,19 +465,47 @@ uint8_t CPU::RTS(){
     return 0;
 }
 
+uint8_t CPU::PHA(){
+    push(registers.A);
+    return 0;
+}
+
+uint8_t CPU::PHP(){
+    push(registers.P | 0x30);
+    return 0;
+}
+
+uint8_t CPU::PLA(){
+    registers.A = pop();
+    setFlag(ZERO, registers.A == 0);
+    setFlag(NEGATIVE, registers.A & 0x80);
+    return 0;
+}
+
+uint8_t CPU::PLP(){
+    registers.P = pop();
+    setFlag(BREAK, false);
+    setFlag(UNUSED, true);
+    return 0;
+}
+
 void CPU::fillOpcodes(){
     instructions.fill({"XXX", &CPU::XXX, &CPU::IMP, 2, false});
 
+    instructions[0x08] = {"PHP", &CPU::PHP, &CPU::IMP, 3, false};
     instructions[0x10] = {"BPL", &CPU::BPL, &CPU::REL, 2, true};
     instructions[0x18] = {"CLC", &CPU::CLC, &CPU::IMP, 2, false};
     instructions[0x20] = {"JSR", &CPU::JSR, &CPU::ABS, 6, false};
+    instructions[0x28] = {"PLP", &CPU::PLP, &CPU::IMP, 4, false};
     instructions[0x30] = {"BMI", &CPU::BMI, &CPU::REL, 2, true};
     instructions[0x38] = {"SEC", &CPU::SEC, &CPU::IMP, 2, false};
+    instructions[0x48] = {"PHA", &CPU::PHA, &CPU::IMP, 3, false};
     instructions[0x4C] = {"JMP", &CPU::JMP, &CPU::ABS, 3, false};
     instructions[0x50] = {"BVC", &CPU::BVC, &CPU::REL, 2, true};
     instructions[0x60] = {"RTS", &CPU::RTS, &CPU::IMP, 6, false};
     instructions[0x61] = {"ADC", &CPU::ADC, &CPU::IZX, 6, false};
     instructions[0x65] = {"ADC", &CPU::ADC, &CPU::ZP, 3, false};
+    instructions[0x68] = {"PLA", &CPU::PLA, &CPU::IMP, 4, false};
     instructions[0x69] = {"ADC", &CPU::ADC, &CPU::IMM, 2, false};
     instructions[0x6C] = {"JMP", &CPU::JMP, &CPU::IND, 5, false};
     instructions[0x6D] = {"ADC", &CPU::ADC, &CPU::ABS, 4, false};

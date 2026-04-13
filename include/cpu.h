@@ -121,6 +121,10 @@ private:
     uint8_t JMP();
     uint8_t JSR();
     uint8_t RTS();
+    uint8_t PHA();
+    uint8_t PHP();
+    uint8_t PLA();
+    uint8_t PLP();
 
     void fillOpcodes();
 

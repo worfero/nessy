@@ -31,7 +31,7 @@ class NES {
         void printCpuRegisters();
         void printCpuFlags();
 
-        // SRAM public functions
+        // memory public functions
         void printMemoryMap(uint16_t startAddr, uint16_t rows);
 
     private:
