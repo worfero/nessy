@@ -64,7 +64,6 @@ private:
 
     uint8_t fetchValue();
     void writebackValue(uint8_t value);
-    uint8_t fetchedValue = 0;
     uint16_t fetchAddr = 0;
 
     // stack functions
@@ -131,6 +130,10 @@ private:
     uint8_t AND();
     uint8_t EOR();
     uint8_t ORA();
+    uint8_t ASL();
+    uint8_t LSR();
+    uint8_t ROL();
+    uint8_t ROR();
 
     void fillOpcodes();
 

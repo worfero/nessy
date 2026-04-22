@@ -535,55 +535,131 @@ uint8_t CPU::ORA(){
     return 1;
 }
 
+uint8_t CPU::ASL(){
+    uint8_t value = fetchValue();
+    setFlag(CARRY, value & 0x80);
+
+    value <<= 1;
+    setFlag(ZERO, value == 0);
+    setFlag(NEGATIVE, value & 0x80);
+
+    writebackValue(value);
+
+    return 0;
+}
+
+uint8_t CPU::LSR(){
+    uint8_t value = fetchValue();
+    setFlag(CARRY, value & 0x01);
+
+    value >>= 1;
+    setFlag(ZERO, value == 0);
+    setFlag(NEGATIVE, value & 0x80);
+
+    writebackValue(value);
+
+    return 0;
+}
+
+uint8_t CPU::ROL(){
+    uint8_t value = fetchValue();
+    uint8_t oldCarry = getFlag(CARRY);
+    setFlag(CARRY, value & 0x80);
+
+    value = (value << 1) | oldCarry;
+
+    setFlag(ZERO, value == 0);
+    setFlag(NEGATIVE, value & 0x80);
+
+    writebackValue(value);
+
+    return 0;
+}
+
+uint8_t CPU::ROR(){
+    uint8_t value = fetchValue();
+    uint8_t oldCarry = getFlag(CARRY) << 7;
+    setFlag(CARRY, value & 0x01);
+
+    value = (value >> 1) | oldCarry;
+
+    setFlag(ZERO, value == 0);
+    setFlag(NEGATIVE, value & 0x80);
+
+    writebackValue(value);
+
+    return 0;
+}
+
 void CPU::fillOpcodes(){
     instructions.fill({"XXX", &CPU::XXX, &CPU::IMP, 2, false});
 
     instructions[0x01] = {"ORA", &CPU::ORA, &CPU::IZX, 6, false};
     instructions[0x05] = {"ORA", &CPU::ORA, &CPU::ZP, 3, false};
+    instructions[0x06] = {"ASL", &CPU::ASL, &CPU::ZP, 5, false};
     instructions[0x08] = {"PHP", &CPU::PHP, &CPU::IMP, 3, false};
     instructions[0x09] = {"ORA", &CPU::ORA, &CPU::IMM, 2, false};
+    instructions[0x0A] = {"ASL", &CPU::ASL, &CPU::ACC, 2, false};
     instructions[0x0D] = {"ORA", &CPU::ORA, &CPU::ABS, 4, false};
+    instructions[0x0E] = {"ASL", &CPU::ASL, &CPU::ABS, 6, false};
     instructions[0x10] = {"BPL", &CPU::BPL, &CPU::REL, 2, true};
     instructions[0x11] = {"ORA", &CPU::ORA, &CPU::IZY, 5, false};
     instructions[0x15] = {"ORA", &CPU::ORA, &CPU::ZPX, 4, false};
+    instructions[0x16] = {"ASL", &CPU::ASL, &CPU::ZPX, 6, false};
     instructions[0x18] = {"CLC", &CPU::CLC, &CPU::IMP, 2, false};
     instructions[0x19] = {"ORA", &CPU::ORA, &CPU::ABY, 4, false};
     instructions[0x1D] = {"ORA", &CPU::ORA, &CPU::ABX, 4, false};
+    instructions[0x1E] = {"ASL", &CPU::ASL, &CPU::ABX, 7, false};
     instructions[0x20] = {"JSR", &CPU::JSR, &CPU::ABS, 6, false};
     instructions[0x21] = {"AND", &CPU::AND, &CPU::IZX, 6, false};
     instructions[0x25] = {"AND", &CPU::AND, &CPU::ZP, 3, false};
+    instructions[0x26] = {"ROL", &CPU::ROL, &CPU::ZP, 5, false};
     instructions[0x28] = {"PLP", &CPU::PLP, &CPU::IMP, 4, false};
     instructions[0x29] = {"AND", &CPU::AND, &CPU::IMM, 2, false};
+    instructions[0x2A] = {"ROL", &CPU::ROL, &CPU::ACC, 2, false};
     instructions[0x2D] = {"AND", &CPU::AND, &CPU::ABS, 4, false};
+    instructions[0x2E] = {"ROL", &CPU::ROL, &CPU::ABS, 6, false};
     instructions[0x30] = {"BMI", &CPU::BMI, &CPU::REL, 2, true};
     instructions[0x31] = {"AND", &CPU::AND, &CPU::IZY, 5, false};
     instructions[0x35] = {"AND", &CPU::AND, &CPU::ZPX, 4, false};
+    instructions[0x36] = {"ROL", &CPU::ROL, &CPU::ZPX, 6, false};
     instructions[0x38] = {"SEC", &CPU::SEC, &CPU::IMP, 2, false};
     instructions[0x39] = {"AND", &CPU::AND, &CPU::ABY, 4, false};
     instructions[0x3D] = {"AND", &CPU::AND, &CPU::ABX, 4, false};
+    instructions[0x3E] = {"ROL", &CPU::ROL, &CPU::ABX, 7, false};
     instructions[0x41] = {"EOR", &CPU::EOR, &CPU::IZX, 6, false};
     instructions[0x45] = {"EOR", &CPU::EOR, &CPU::ZP, 3, false};
+    instructions[0x46] = {"LSR", &CPU::LSR, &CPU::ZP, 5, false};
     instructions[0x48] = {"PHA", &CPU::PHA, &CPU::IMP, 3, false};
     instructions[0x49] = {"EOR", &CPU::EOR, &CPU::IMM, 2, false};
+    instructions[0x4A] = {"LSR", &CPU::LSR, &CPU::ACC, 2, false};
     instructions[0x4C] = {"JMP", &CPU::JMP, &CPU::ABS, 3, false};
     instructions[0x4D] = {"EOR", &CPU::EOR, &CPU::ABS, 4, false};
+    instructions[0x4E] = {"LSR", &CPU::LSR, &CPU::ABS, 6, false};
     instructions[0x50] = {"BVC", &CPU::BVC, &CPU::REL, 2, true};
     instructions[0x51] = {"EOR", &CPU::EOR, &CPU::IZY, 5, false};
     instructions[0x55] = {"EOR", &CPU::EOR, &CPU::ZPX, 4, false};
+    instructions[0x56] = {"LSR", &CPU::LSR, &CPU::ZPX, 6, false};
     instructions[0x59] = {"EOR", &CPU::EOR, &CPU::ABY, 4, false};
     instructions[0x5D] = {"EOR", &CPU::EOR, &CPU::ABX, 4, false};
+    instructions[0x5E] = {"LSR", &CPU::LSR, &CPU::ABX, 7, false};
     instructions[0x60] = {"RTS", &CPU::RTS, &CPU::IMP, 6, false};
     instructions[0x61] = {"ADC", &CPU::ADC, &CPU::IZX, 6, false};
     instructions[0x65] = {"ADC", &CPU::ADC, &CPU::ZP, 3, false};
+    instructions[0x66] = {"ROR", &CPU::ROR, &CPU::ZP, 5, false};
     instructions[0x68] = {"PLA", &CPU::PLA, &CPU::IMP, 4, false};
     instructions[0x69] = {"ADC", &CPU::ADC, &CPU::IMM, 2, false};
+    instructions[0x6A] = {"ROR", &CPU::ROR, &CPU::ACC, 2, false};
     instructions[0x6C] = {"JMP", &CPU::JMP, &CPU::IND, 5, false};
     instructions[0x6D] = {"ADC", &CPU::ADC, &CPU::ABS, 4, false};
+    instructions[0x6E] = {"ROR", &CPU::ROR, &CPU::ABS, 6, false};
     instructions[0x70] = {"BVS", &CPU::BVC, &CPU::REL, 2, true};
     instructions[0x71] = {"ADC", &CPU::ADC, &CPU::IZY, 5, false};
     instructions[0x75] = {"ADC", &CPU::ADC, &CPU::ZPX, 4, false};
+    instructions[0x76] = {"ROR", &CPU::ROR, &CPU::ZPX, 6, false};
     instructions[0x79] = {"ADC", &CPU::ADC, &CPU::ABY, 4, false};
     instructions[0x7D] = {"ADC", &CPU::ADC, &CPU::ABX, 4, false};
+    instructions[0x7E] = {"ROR", &CPU::ROR, &CPU::ABX, 7, false};
     instructions[0x81] = {"STA", &CPU::STA, &CPU::IZX, 6, false};
     instructions[0x84] = {"STY", &CPU::STY, &CPU::ZP, 3, false};
     instructions[0x85] = {"STA", &CPU::STA, &CPU::ZP, 3, false};
@@ -662,13 +738,17 @@ void CPU::fillOpcodes(){
 }
 
 uint8_t CPU::fetchValue(){
-    if (!(instructions[opcode].addrMode == &CPU::IMP))
-        fetchedValue = bus.read(fetchAddr);
-    return fetchedValue;
+    if((instructions[opcode].addrMode == &CPU::ACC))
+        return registers.A;
+    else if(!(instructions[opcode].addrMode == &CPU::IMP))
+        return bus.read(fetchAddr);
+    return 0;
 }
 
 void CPU::writebackValue(uint8_t value){
-    if (!(instructions[opcode].addrMode == &CPU::IMP))
+    if ((instructions[opcode].addrMode == &CPU::ACC))
+        registers.A = value;
+    else
         bus.write(fetchAddr, value);
 }
 
@@ -712,7 +792,6 @@ void CPU::reset(){
     uint16_t reset_hi = bus.read(0xFFFD);
     registers.PC = (reset_hi << 8) | reset_lo;
 
-    fetchedValue = 0;
     fetchAddr = 0;
 
     instructionCycles = 0;
