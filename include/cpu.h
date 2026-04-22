@@ -106,7 +106,12 @@ private:
     uint8_t DEX();
     uint8_t DEY();
     uint8_t CLC();
+    uint8_t CLD();
+    uint8_t CLI();
+    uint8_t CLV();
     uint8_t SEC();
+    uint8_t SED();
+    uint8_t SEI();
     uint8_t ADC();
     uint8_t SBC();
     uint8_t CMP();
@@ -134,6 +139,7 @@ private:
     uint8_t LSR();
     uint8_t ROL();
     uint8_t ROR();
+    uint8_t BIT();
 
     void fillOpcodes();
 

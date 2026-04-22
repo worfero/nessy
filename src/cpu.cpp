@@ -280,8 +280,38 @@ uint8_t CPU::CLC(){
     return 0;
 }
 
+uint8_t CPU::CLD(){
+    setFlag(DECIMAL, 0);
+
+    return 0;
+}
+
+uint8_t CPU::CLI(){
+    setFlag(INTERRUPT, 0);
+
+    return 0;
+}
+
+uint8_t CPU::CLV(){
+    setFlag(OVERFLOW, 0);
+
+    return 0;
+}
+
 uint8_t CPU::SEC(){
     setFlag(CARRY, 1);
+
+    return 0;
+}
+
+uint8_t CPU::SED(){
+    setFlag(DECIMAL, 1);
+
+    return 0;
+}
+
+uint8_t CPU::SEI(){
+    setFlag(INTERRUPT, 1);
 
     return 0;
 }
@@ -591,6 +621,15 @@ uint8_t CPU::ROR(){
     return 0;
 }
 
+uint8_t CPU::BIT(){
+    uint8_t value = fetchValue();
+    setFlag(ZERO, (registers.A & value) == 0);
+    setFlag(NEGATIVE, value & 0x80);
+    setFlag(OVERFLOW, value & 0x40);
+
+    return 0;
+}
+
 void CPU::fillOpcodes(){
     instructions.fill({"XXX", &CPU::XXX, &CPU::IMP, 2, false});
 
@@ -612,11 +651,13 @@ void CPU::fillOpcodes(){
     instructions[0x1E] = {"ASL", &CPU::ASL, &CPU::ABX, 7, false};
     instructions[0x20] = {"JSR", &CPU::JSR, &CPU::ABS, 6, false};
     instructions[0x21] = {"AND", &CPU::AND, &CPU::IZX, 6, false};
+    instructions[0x24] = {"BIT", &CPU::BIT, &CPU::ZP, 3, false};
     instructions[0x25] = {"AND", &CPU::AND, &CPU::ZP, 3, false};
     instructions[0x26] = {"ROL", &CPU::ROL, &CPU::ZP, 5, false};
     instructions[0x28] = {"PLP", &CPU::PLP, &CPU::IMP, 4, false};
     instructions[0x29] = {"AND", &CPU::AND, &CPU::IMM, 2, false};
     instructions[0x2A] = {"ROL", &CPU::ROL, &CPU::ACC, 2, false};
+    instructions[0x2C] = {"BIT", &CPU::BIT, &CPU::ABS, 4, false};
     instructions[0x2D] = {"AND", &CPU::AND, &CPU::ABS, 4, false};
     instructions[0x2E] = {"ROL", &CPU::ROL, &CPU::ABS, 6, false};
     instructions[0x30] = {"BMI", &CPU::BMI, &CPU::REL, 2, true};
@@ -640,6 +681,7 @@ void CPU::fillOpcodes(){
     instructions[0x51] = {"EOR", &CPU::EOR, &CPU::IZY, 5, false};
     instructions[0x55] = {"EOR", &CPU::EOR, &CPU::ZPX, 4, false};
     instructions[0x56] = {"LSR", &CPU::LSR, &CPU::ZPX, 6, false};
+    instructions[0x58] = {"CLI", &CPU::CLI, &CPU::IMP, 2, false};
     instructions[0x59] = {"EOR", &CPU::EOR, &CPU::ABY, 4, false};
     instructions[0x5D] = {"EOR", &CPU::EOR, &CPU::ABX, 4, false};
     instructions[0x5E] = {"LSR", &CPU::LSR, &CPU::ABX, 7, false};
@@ -657,6 +699,7 @@ void CPU::fillOpcodes(){
     instructions[0x71] = {"ADC", &CPU::ADC, &CPU::IZY, 5, false};
     instructions[0x75] = {"ADC", &CPU::ADC, &CPU::ZPX, 4, false};
     instructions[0x76] = {"ROR", &CPU::ROR, &CPU::ZPX, 6, false};
+    instructions[0x78] = {"SEI", &CPU::SEI, &CPU::IMP, 2, false};
     instructions[0x79] = {"ADC", &CPU::ADC, &CPU::ABY, 4, false};
     instructions[0x7D] = {"ADC", &CPU::ADC, &CPU::ABX, 4, false};
     instructions[0x7E] = {"ROR", &CPU::ROR, &CPU::ABX, 7, false};
@@ -695,6 +738,7 @@ void CPU::fillOpcodes(){
     instructions[0xB4] = {"LDY", &CPU::LDY, &CPU::ZPX, 4, false};
     instructions[0xB5] = {"LDA", &CPU::LDA, &CPU::ZPX, 4, false};
     instructions[0xB6] = {"LDX", &CPU::LDX, &CPU::ZPY, 4, false};
+    instructions[0xB8] = {"CLV", &CPU::CLV, &CPU::IMP, 2, false};
     instructions[0xB9] = {"LDA", &CPU::LDA, &CPU::ABY, 4, false};
     instructions[0xBA] = {"TSX", &CPU::TSX, &CPU::IMP, 2, false};
     instructions[0xBC] = {"LDY", &CPU::LDY, &CPU::ABX, 4, false};
@@ -715,6 +759,7 @@ void CPU::fillOpcodes(){
     instructions[0xD1] = {"CMP", &CPU::CMP, &CPU::INY, 5, false};
     instructions[0xD5] = {"CMP", &CPU::CMP, &CPU::ZPX, 4, false};
     instructions[0xD6] = {"DEC", &CPU::DEC, &CPU::ZPX, 6, false};
+    instructions[0xD8] = {"CLD", &CPU::CLD, &CPU::IMP, 2, false};
     instructions[0xD9] = {"CMP", &CPU::CMP, &CPU::ABY, 4, false};
     instructions[0xDD] = {"CMP", &CPU::CMP, &CPU::ABX, 4, false};
     instructions[0xDE] = {"DEC", &CPU::DEC, &CPU::ABX, 7, false};
@@ -732,6 +777,7 @@ void CPU::fillOpcodes(){
     instructions[0xF1] = {"SBC", &CPU::SBC, &CPU::IZY, 5, false};
     instructions[0xF5] = {"SBC", &CPU::SBC, &CPU::ZPX, 4, false};
     instructions[0xF6] = {"INC", &CPU::INC, &CPU::ZPX, 6, false};
+    instructions[0xF8] = {"SED", &CPU::SED, &CPU::IMP, 2, false};
     instructions[0xF9] = {"SBC", &CPU::SBC, &CPU::ABY, 4, false};
     instructions[0xFD] = {"SBC", &CPU::SBC, &CPU::ABX, 4, false};
     instructions[0xFE] = {"INC", &CPU::INC, &CPU::ABX, 7, false};
