@@ -497,12 +497,36 @@ uint8_t CPU::AND(){
     return 1;
 }
 
+uint8_t CPU::EOR(){
+    uint8_t value = fetchValue();
+    registers.A ^= value;
+    setFlag(ZERO, registers.A == 0);
+    setFlag(NEGATIVE, registers.A & 0x80);
+    return 1;
+}
+
+uint8_t CPU::ORA(){
+    uint8_t value = fetchValue();
+    registers.A |= value;
+    setFlag(ZERO, registers.A == 0);
+    setFlag(NEGATIVE, registers.A & 0x80);
+    return 1;
+}
+
 void CPU::fillOpcodes(){
     instructions.fill({"XXX", &CPU::XXX, &CPU::IMP, 2, false});
 
+    instructions[0x01] = {"ORA", &CPU::ORA, &CPU::IZX, 6, false};
+    instructions[0x05] = {"ORA", &CPU::ORA, &CPU::ZP, 3, false};
     instructions[0x08] = {"PHP", &CPU::PHP, &CPU::IMP, 3, false};
+    instructions[0x09] = {"ORA", &CPU::ORA, &CPU::IMM, 2, false};
+    instructions[0x0D] = {"ORA", &CPU::ORA, &CPU::ABS, 4, false};
     instructions[0x10] = {"BPL", &CPU::BPL, &CPU::REL, 2, true};
+    instructions[0x11] = {"ORA", &CPU::ORA, &CPU::IZY, 5, false};
+    instructions[0x15] = {"ORA", &CPU::ORA, &CPU::ZPX, 4, false};
     instructions[0x18] = {"CLC", &CPU::CLC, &CPU::IMP, 2, false};
+    instructions[0x19] = {"ORA", &CPU::ORA, &CPU::ABY, 4, false};
+    instructions[0x1D] = {"ORA", &CPU::ORA, &CPU::ABX, 4, false};
     instructions[0x20] = {"JSR", &CPU::JSR, &CPU::ABS, 6, false};
     instructions[0x21] = {"AND", &CPU::AND, &CPU::IZX, 6, false};
     instructions[0x25] = {"AND", &CPU::AND, &CPU::ZP, 3, false};
@@ -515,9 +539,17 @@ void CPU::fillOpcodes(){
     instructions[0x38] = {"SEC", &CPU::SEC, &CPU::IMP, 2, false};
     instructions[0x39] = {"AND", &CPU::AND, &CPU::ABY, 4, false};
     instructions[0x3D] = {"AND", &CPU::AND, &CPU::ABX, 4, false};
+    instructions[0x41] = {"EOR", &CPU::EOR, &CPU::IZX, 6, false};
+    instructions[0x45] = {"EOR", &CPU::EOR, &CPU::ZP, 3, false};
     instructions[0x48] = {"PHA", &CPU::PHA, &CPU::IMP, 3, false};
+    instructions[0x49] = {"EOR", &CPU::EOR, &CPU::IMM, 2, false};
     instructions[0x4C] = {"JMP", &CPU::JMP, &CPU::ABS, 3, false};
+    instructions[0x4D] = {"EOR", &CPU::EOR, &CPU::ABS, 4, false};
     instructions[0x50] = {"BVC", &CPU::BVC, &CPU::REL, 2, true};
+    instructions[0x51] = {"EOR", &CPU::EOR, &CPU::IZY, 5, false};
+    instructions[0x55] = {"EOR", &CPU::EOR, &CPU::ZPX, 4, false};
+    instructions[0x59] = {"EOR", &CPU::EOR, &CPU::ABY, 4, false};
+    instructions[0x5D] = {"EOR", &CPU::EOR, &CPU::ABX, 4, false};
     instructions[0x60] = {"RTS", &CPU::RTS, &CPU::IMP, 6, false};
     instructions[0x61] = {"ADC", &CPU::ADC, &CPU::IZX, 6, false};
     instructions[0x65] = {"ADC", &CPU::ADC, &CPU::ZP, 3, false};

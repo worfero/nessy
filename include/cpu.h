@@ -126,6 +126,8 @@ private:
     uint8_t PLA();
     uint8_t PLP();
     uint8_t AND();
+    uint8_t EOR();
+    uint8_t ORA();
 
     void fillOpcodes();
 
