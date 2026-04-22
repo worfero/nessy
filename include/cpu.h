@@ -125,6 +125,7 @@ private:
     uint8_t PHP();
     uint8_t PLA();
     uint8_t PLP();
+    uint8_t AND();
 
     void fillOpcodes();
 

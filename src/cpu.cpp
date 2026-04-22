@@ -489,6 +489,14 @@ uint8_t CPU::PLP(){
     return 0;
 }
 
+uint8_t CPU::AND(){
+    uint8_t value = fetchValue();
+    registers.A &= value;
+    setFlag(ZERO, registers.A == 0);
+    setFlag(NEGATIVE, registers.A & 0x80);
+    return 1;
+}
+
 void CPU::fillOpcodes(){
     instructions.fill({"XXX", &CPU::XXX, &CPU::IMP, 2, false});
 
@@ -496,9 +504,17 @@ void CPU::fillOpcodes(){
     instructions[0x10] = {"BPL", &CPU::BPL, &CPU::REL, 2, true};
     instructions[0x18] = {"CLC", &CPU::CLC, &CPU::IMP, 2, false};
     instructions[0x20] = {"JSR", &CPU::JSR, &CPU::ABS, 6, false};
+    instructions[0x21] = {"AND", &CPU::AND, &CPU::IZX, 6, false};
+    instructions[0x25] = {"AND", &CPU::AND, &CPU::ZP, 3, false};
     instructions[0x28] = {"PLP", &CPU::PLP, &CPU::IMP, 4, false};
+    instructions[0x29] = {"AND", &CPU::AND, &CPU::IMM, 2, false};
+    instructions[0x2D] = {"AND", &CPU::AND, &CPU::ABS, 4, false};
     instructions[0x30] = {"BMI", &CPU::BMI, &CPU::REL, 2, true};
+    instructions[0x31] = {"AND", &CPU::AND, &CPU::IZY, 5, false};
+    instructions[0x35] = {"AND", &CPU::AND, &CPU::ZPX, 4, false};
     instructions[0x38] = {"SEC", &CPU::SEC, &CPU::IMP, 2, false};
+    instructions[0x39] = {"AND", &CPU::AND, &CPU::ABY, 4, false};
+    instructions[0x3D] = {"AND", &CPU::AND, &CPU::ABX, 4, false};
     instructions[0x48] = {"PHA", &CPU::PHA, &CPU::IMP, 3, false};
     instructions[0x4C] = {"JMP", &CPU::JMP, &CPU::ABS, 3, false};
     instructions[0x50] = {"BVC", &CPU::BVC, &CPU::REL, 2, true};
