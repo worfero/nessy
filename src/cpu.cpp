@@ -216,6 +216,17 @@ uint8_t CPU::TXS(){
     return 0;
 }
 
+uint8_t CPU::INC(){
+    uint8_t value = fetchValue();
+    value++;
+    writebackValue(value);
+
+    setFlag(ZERO, value == 0);
+    setFlag(NEGATIVE, value & 0x80);
+
+    return 0;
+}
+
 uint8_t CPU::INX(){
     // uint8_t automatically wraps 0xFF to 0x00
     registers.X++;
@@ -230,6 +241,17 @@ uint8_t CPU::INY(){
     registers.Y++;
     setFlag(ZERO, registers.Y == 0);
     setFlag(NEGATIVE, registers.Y & 0x80);
+
+    return 0;
+}
+
+uint8_t CPU::DEC(){
+    uint8_t value = fetchValue();
+    value--;
+    writebackValue(value);
+
+    setFlag(ZERO, value == 0);
+    setFlag(NEGATIVE, value & 0x80);
 
     return 0;
 }
@@ -606,35 +628,48 @@ void CPU::fillOpcodes(){
     instructions[0xC1] = {"CMP", &CPU::CMP, &CPU::INX, 6, false};
     instructions[0xC4] = {"CPY", &CPU::CPY, &CPU::ZP, 3, false};
     instructions[0xC5] = {"CMP", &CPU::CMP, &CPU::ZP, 3, false};
+    instructions[0xC6] = {"DEC", &CPU::DEC, &CPU::ZP, 5, false};
     instructions[0xC8] = {"INY", &CPU::INY, &CPU::IMP, 2, false};
     instructions[0xC9] = {"CMP", &CPU::CMP, &CPU::IMM, 2, false};
     instructions[0xCA] = {"DEX", &CPU::DEX, &CPU::IMP, 2, false};
     instructions[0xCC] = {"CPY", &CPU::CPY, &CPU::ABS, 4, false};
     instructions[0xCD] = {"CMP", &CPU::CMP, &CPU::ABS, 4, false};
+    instructions[0xCE] = {"DEC", &CPU::DEC, &CPU::ABS, 6, false};
     instructions[0xD0] = {"BNE", &CPU::BNE, &CPU::REL, 2, true};
     instructions[0xD1] = {"CMP", &CPU::CMP, &CPU::INY, 5, false};
     instructions[0xD5] = {"CMP", &CPU::CMP, &CPU::ZPX, 4, false};
+    instructions[0xD6] = {"DEC", &CPU::DEC, &CPU::ZPX, 6, false};
     instructions[0xD9] = {"CMP", &CPU::CMP, &CPU::ABY, 4, false};
     instructions[0xDD] = {"CMP", &CPU::CMP, &CPU::ABX, 4, false};
+    instructions[0xDE] = {"DEC", &CPU::DEC, &CPU::ABX, 7, false};
     instructions[0xE0] = {"CPX", &CPU::CPX, &CPU::IMM, 2, false};
     instructions[0xE1] = {"SBC", &CPU::SBC, &CPU::IZX, 6, false};
     instructions[0xE4] = {"CPX", &CPU::CPX, &CPU::ZP, 3, false};
     instructions[0xE5] = {"SBC", &CPU::SBC, &CPU::ZP, 3, false};
+    instructions[0xE6] = {"INC", &CPU::INC, &CPU::ZP, 5, false};
     instructions[0xE8] = {"INX", &CPU::INX, &CPU::IMP, 2, false};
     instructions[0xE9] = {"SBC", &CPU::SBC, &CPU::IMM, 2, false};
     instructions[0xEC] = {"CPX", &CPU::CPX, &CPU::ABS, 4, false};
     instructions[0xED] = {"SBC", &CPU::SBC, &CPU::ABS, 4, false};
+    instructions[0xEE] = {"INC", &CPU::INC, &CPU::ABS, 6, false};
     instructions[0xF0] = {"BEQ", &CPU::BEQ, &CPU::REL, 2, true};
     instructions[0xF1] = {"SBC", &CPU::SBC, &CPU::IZY, 5, false};
     instructions[0xF5] = {"SBC", &CPU::SBC, &CPU::ZPX, 4, false};
+    instructions[0xF6] = {"INC", &CPU::INC, &CPU::ZPX, 6, false};
     instructions[0xF9] = {"SBC", &CPU::SBC, &CPU::ABY, 4, false};
     instructions[0xFD] = {"SBC", &CPU::SBC, &CPU::ABX, 4, false};
+    instructions[0xFE] = {"INC", &CPU::INC, &CPU::ABX, 7, false};
 }
 
 uint8_t CPU::fetchValue(){
     if (!(instructions[opcode].addrMode == &CPU::IMP))
         fetchedValue = bus.read(fetchAddr);
     return fetchedValue;
+}
+
+void CPU::writebackValue(uint8_t value){
+    if (!(instructions[opcode].addrMode == &CPU::IMP))
+        bus.write(fetchAddr, value);
 }
 
 void CPU::push(uint8_t value){

@@ -63,6 +63,7 @@ private:
     uint8_t opcode = 0;
 
     uint8_t fetchValue();
+    void writebackValue(uint8_t value);
     uint8_t fetchedValue = 0;
     uint16_t fetchAddr = 0;
 
@@ -99,8 +100,10 @@ private:
     uint8_t TYA();
     uint8_t TSX();
     uint8_t TXS();
+    uint8_t INC();
     uint8_t INX();
     uint8_t INY();
+    uint8_t DEC();
     uint8_t DEX();
     uint8_t DEY();
     uint8_t CLC();
