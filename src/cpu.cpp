@@ -659,9 +659,22 @@ uint8_t CPU::NOP(){
     return 0;
 }
 
+uint8_t CPU::ALR(){
+    uint8_t value = fetchValue();
+    registers.A &= value;
+    setFlag(CARRY, registers.A & 0x01);
+
+    registers.A >>= 1;
+    setFlag(ZERO, registers.A == 0);
+    setFlag(NEGATIVE, registers.A & 0x80);
+
+    return 0;
+}
+
 void CPU::fillOpcodes(){
     instructions.fill({"XXX", &CPU::XXX, &CPU::IMP, 2, false});
 
+    // official instruction set
     instructions[0x00] = {"BRK", &CPU::BRK, &CPU::IMP, 7, false};
     instructions[0x01] = {"ORA", &CPU::ORA, &CPU::IZX, 6, false};
     instructions[0x05] = {"ORA", &CPU::ORA, &CPU::ZP, 3, false};
@@ -726,7 +739,7 @@ void CPU::fillOpcodes(){
     instructions[0x6C] = {"JMP", &CPU::JMP, &CPU::IND, 5, false};
     instructions[0x6D] = {"ADC", &CPU::ADC, &CPU::ABS, 4, false};
     instructions[0x6E] = {"ROR", &CPU::ROR, &CPU::ABS, 6, false};
-    instructions[0x70] = {"BVS", &CPU::BVC, &CPU::REL, 2, true};
+    instructions[0x70] = {"BVS", &CPU::BVS, &CPU::REL, 2, true};
     instructions[0x71] = {"ADC", &CPU::ADC, &CPU::IZY, 5, false};
     instructions[0x75] = {"ADC", &CPU::ADC, &CPU::ZPX, 4, false};
     instructions[0x76] = {"ROR", &CPU::ROR, &CPU::ZPX, 6, false};
@@ -776,7 +789,7 @@ void CPU::fillOpcodes(){
     instructions[0xBD] = {"LDA", &CPU::LDA, &CPU::ABX, 4, false};
     instructions[0xBE] = {"LDX", &CPU::LDX, &CPU::ABY, 4, false};
     instructions[0xC0] = {"CPY", &CPU::CPY, &CPU::IMM, 2, false};
-    instructions[0xC1] = {"CMP", &CPU::CMP, &CPU::INX, 6, false};
+    instructions[0xC1] = {"CMP", &CPU::CMP, &CPU::IZX, 6, false};
     instructions[0xC4] = {"CPY", &CPU::CPY, &CPU::ZP, 3, false};
     instructions[0xC5] = {"CMP", &CPU::CMP, &CPU::ZP, 3, false};
     instructions[0xC6] = {"DEC", &CPU::DEC, &CPU::ZP, 5, false};
@@ -787,7 +800,7 @@ void CPU::fillOpcodes(){
     instructions[0xCD] = {"CMP", &CPU::CMP, &CPU::ABS, 4, false};
     instructions[0xCE] = {"DEC", &CPU::DEC, &CPU::ABS, 6, false};
     instructions[0xD0] = {"BNE", &CPU::BNE, &CPU::REL, 2, true};
-    instructions[0xD1] = {"CMP", &CPU::CMP, &CPU::INY, 5, false};
+    instructions[0xD1] = {"CMP", &CPU::CMP, &CPU::IZY, 5, false};
     instructions[0xD5] = {"CMP", &CPU::CMP, &CPU::ZPX, 4, false};
     instructions[0xD6] = {"DEC", &CPU::DEC, &CPU::ZPX, 6, false};
     instructions[0xD8] = {"CLD", &CPU::CLD, &CPU::IMP, 2, false};
@@ -813,6 +826,9 @@ void CPU::fillOpcodes(){
     instructions[0xF9] = {"SBC", &CPU::SBC, &CPU::ABY, 4, false};
     instructions[0xFD] = {"SBC", &CPU::SBC, &CPU::ABX, 4, false};
     instructions[0xFE] = {"INC", &CPU::INC, &CPU::ABX, 7, false};
+
+    // unofficial instruction set
+    instructions[0x4B] = {"ALR", &CPU::ALR, &CPU::IMM, 2, false};
 }
 
 uint8_t CPU::fetchValue(){

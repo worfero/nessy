@@ -152,6 +152,9 @@ private:
     uint8_t RTI();
     uint8_t NOP();
 
+    // unofficial instruction set
+    uint8_t ALR();
+
     void fillOpcodes();
 
     uint8_t readBus(uint16_t address);
