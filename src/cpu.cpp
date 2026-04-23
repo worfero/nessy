@@ -700,6 +700,20 @@ uint8_t CPU::ANE(){
     return 0;
 }
 
+uint8_t CPU::ARR(){
+    uint8_t value = fetchValue();
+    uint8_t oldCarry = getFlag(CARRY) << 7;
+    registers.A = ((registers.A & value) >> 1) | oldCarry;
+
+    bool isOverflow = ((registers.A >> 6) ^ (registers.A >> 5)) & 1;
+    setFlag(CARRY, registers.A & 0x40);
+    setFlag(ZERO, registers.A == 0);
+    setFlag(NEGATIVE, registers.A & 0x80);
+    setFlag(OVERFLOW, isOverflow);
+
+    return 0;
+}
+
 void CPU::fillOpcodes(){
     instructions.fill({"XXX", &CPU::XXX, &CPU::IMP, 2, false});
 
@@ -858,9 +872,10 @@ void CPU::fillOpcodes(){
 
     // unofficial instruction set
 
-    instructions[0x4B] = {"ALR", &CPU::ALR, &CPU::IMM, 2, false};
     instructions[0x0B] = {"ANC", &CPU::ANC, &CPU::IMM, 2, false};
     instructions[0x2B] = {"ANC2", &CPU::ANC2, &CPU::IMM, 2, false};
+    instructions[0x4B] = {"ALR", &CPU::ALR, &CPU::IMM, 2, false};
+    instructions[0x6B] = {"ARR", &CPU::ARR, &CPU::IMM, 2, false};
     instructions[0x8B] = {"ANE", &CPU::ANE, &CPU::IMM, 2, false};
 }
 

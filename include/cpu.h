@@ -157,6 +157,8 @@ private:
     uint8_t ANC();
     uint8_t ANC2();
     uint8_t ANE();
+    uint8_t ARR();
+    
 
     void fillOpcodes();
 
