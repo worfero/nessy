@@ -5,6 +5,10 @@
 #include <string>
 #include <array>
 
+#define NMI 0xFFFA
+#define RST 0xFFFC
+#define IRQ 0xFFFE
+
 class Bus;
 
 class CPU{
@@ -62,6 +66,7 @@ private:
     uint64_t cycleCount = 0;
     uint8_t opcode = 0;
 
+    // operation helper functions
     uint8_t fetchValue();
     void writebackValue(uint8_t value);
     uint16_t fetchAddr = 0;
@@ -69,6 +74,9 @@ private:
     // stack functions
     void push(uint8_t value);
     uint8_t pop();
+
+    // vector read helper
+    uint16_t readVector(uint16_t vectorAddr);
 
     // addressing modes
     uint8_t IMP();
@@ -140,6 +148,7 @@ private:
     uint8_t ROL();
     uint8_t ROR();
     uint8_t BIT();
+    uint8_t BRK();
 
     void fillOpcodes();
 

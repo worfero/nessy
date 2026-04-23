@@ -630,9 +630,24 @@ uint8_t CPU::BIT(){
     return 0;
 }
 
+uint8_t CPU::BRK(){
+    uint16_t returnPC = registers.PC + 1;
+    uint8_t loByte = returnPC & 0xFF;
+    uint8_t hiByte = (returnPC >> 8) & 0xFF;
+    push(hiByte);
+    push(loByte);
+    push(registers.P | 0x30);
+    setFlag(INTERRUPT, true);
+
+    registers.PC = readVector(IRQ);
+
+    return 0;
+}
+
 void CPU::fillOpcodes(){
     instructions.fill({"XXX", &CPU::XXX, &CPU::IMP, 2, false});
 
+    instructions[0x00] = {"BRK", &CPU::BRK, &CPU::IMP, 7, false};
     instructions[0x01] = {"ORA", &CPU::ORA, &CPU::IZX, 6, false};
     instructions[0x05] = {"ORA", &CPU::ORA, &CPU::ZP, 3, false};
     instructions[0x06] = {"ASL", &CPU::ASL, &CPU::ZP, 5, false};
@@ -806,6 +821,12 @@ uint8_t CPU::pop(){
     return bus.read(0x0100 | ++registers.SP);
 }
 
+uint16_t CPU::readVector(uint16_t vectorAddr){
+    uint8_t loByte = bus.read(vectorAddr);
+    uint8_t hiByte = bus.read(vectorAddr + 1);
+    return (hiByte << 8) | loByte;
+}
+
 void CPU::clock(){
     // cycle countdown method, useful for timing but not precise to reality
     if(instructionCycles == 0){
@@ -834,9 +855,7 @@ void CPU::reset(){
     registers.SP = 0xFD;
     registers.P  = 0x24;
 
-    uint16_t reset_lo = bus.read(0xFFFC);
-    uint16_t reset_hi = bus.read(0xFFFD);
-    registers.PC = (reset_hi << 8) | reset_lo;
+    registers.PC = readVector(RST);
 
     fetchAddr = 0;
 
