@@ -644,6 +644,21 @@ uint8_t CPU::BRK(){
     return 0;
 }
 
+uint8_t CPU::RTI(){
+    registers.P = pop();
+    setFlag(BREAK, false);
+    setFlag(UNUSED, true);
+    uint8_t loByte = pop();
+    uint8_t hiByte = pop();
+    registers.PC = (hiByte << 8) | loByte;
+
+    return 0;
+}
+
+uint8_t CPU::NOP(){
+    return 0;
+}
+
 void CPU::fillOpcodes(){
     instructions.fill({"XXX", &CPU::XXX, &CPU::IMP, 2, false});
 
@@ -683,6 +698,7 @@ void CPU::fillOpcodes(){
     instructions[0x39] = {"AND", &CPU::AND, &CPU::ABY, 4, false};
     instructions[0x3D] = {"AND", &CPU::AND, &CPU::ABX, 4, false};
     instructions[0x3E] = {"ROL", &CPU::ROL, &CPU::ABX, 7, false};
+    instructions[0x40] = {"RTI", &CPU::RTI, &CPU::IMP, 6, false};
     instructions[0x41] = {"EOR", &CPU::EOR, &CPU::IZX, 6, false};
     instructions[0x45] = {"EOR", &CPU::EOR, &CPU::ZP, 3, false};
     instructions[0x46] = {"LSR", &CPU::LSR, &CPU::ZP, 5, false};
@@ -785,6 +801,7 @@ void CPU::fillOpcodes(){
     instructions[0xE6] = {"INC", &CPU::INC, &CPU::ZP, 5, false};
     instructions[0xE8] = {"INX", &CPU::INX, &CPU::IMP, 2, false};
     instructions[0xE9] = {"SBC", &CPU::SBC, &CPU::IMM, 2, false};
+    instructions[0xEA] = {"NOP", &CPU::NOP, &CPU::IMP, 2, false};
     instructions[0xEC] = {"CPX", &CPU::CPX, &CPU::ABS, 4, false};
     instructions[0xED] = {"SBC", &CPU::SBC, &CPU::ABS, 4, false};
     instructions[0xEE] = {"INC", &CPU::INC, &CPU::ABS, 6, false};

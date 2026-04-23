@@ -149,6 +149,8 @@ private:
     uint8_t ROR();
     uint8_t BIT();
     uint8_t BRK();
+    uint8_t RTI();
+    uint8_t NOP();
 
     void fillOpcodes();
 
