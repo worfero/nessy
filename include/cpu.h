@@ -154,6 +154,9 @@ private:
 
     // unofficial instruction set
     uint8_t ALR();
+    uint8_t ANC();
+    uint8_t ANC2();
+    uint8_t ANE();
 
     void fillOpcodes();
 

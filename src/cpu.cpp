@@ -671,6 +671,35 @@ uint8_t CPU::ALR(){
     return 0;
 }
 
+uint8_t CPU::ANC(){
+    uint8_t value = fetchValue();
+    registers.A &= value;
+    setFlag(CARRY, registers.A & 0x80);
+    setFlag(ZERO, registers.A == 0);
+    setFlag(NEGATIVE, registers.A & 0x80);
+
+    return 0;
+}
+
+uint8_t CPU::ANC2(){
+    uint8_t value = fetchValue();
+    registers.A &= value;
+    setFlag(CARRY, registers.A & 0x80);
+    setFlag(ZERO, registers.A == 0);
+    setFlag(NEGATIVE, registers.A & 0x80);
+
+    return 0;
+}
+
+uint8_t CPU::ANE(){
+    uint8_t value = fetchValue();
+    registers.A = (registers.A | 0xEE) & registers.X & value;
+    setFlag(ZERO, registers.A == 0);
+    setFlag(NEGATIVE, registers.A & 0x80);
+
+    return 0;
+}
+
 void CPU::fillOpcodes(){
     instructions.fill({"XXX", &CPU::XXX, &CPU::IMP, 2, false});
 
@@ -828,7 +857,11 @@ void CPU::fillOpcodes(){
     instructions[0xFE] = {"INC", &CPU::INC, &CPU::ABX, 7, false};
 
     // unofficial instruction set
+
     instructions[0x4B] = {"ALR", &CPU::ALR, &CPU::IMM, 2, false};
+    instructions[0x0B] = {"ANC", &CPU::ANC, &CPU::IMM, 2, false};
+    instructions[0x2B] = {"ANC2", &CPU::ANC2, &CPU::IMM, 2, false};
+    instructions[0x8B] = {"ANE", &CPU::ANE, &CPU::IMM, 2, false};
 }
 
 uint8_t CPU::fetchValue(){
