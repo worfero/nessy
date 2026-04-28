@@ -1,6 +1,9 @@
 #ifndef BUS_H
 #define BUS_H
 
+#include "../include/ram.h"
+#include "../include/cartridge.h"
+
 #include <cstdint>
 #include <array>
 
@@ -10,21 +13,21 @@
 #define CARTRIDGE_START_ADDR        0x8000
 #define MEMORY_MAP_SIZE             0xFFFF
 
-class SRAM;
+class RAM;
 class Cartridge;
 
 class Bus {
     public:
         Bus();
 
-        void connectSRAM(SRAM *selec_sram);
+        void connectSRAM(RAM *selec_ram);
         void connectCartridge(Cartridge *selec_cartridge);
 
         uint8_t read(uint16_t address);
         void write(uint16_t address, uint8_t data);
 
     private:
-        SRAM *sram = nullptr;
+        RAM *sram = nullptr;
         Cartridge *cartridge = nullptr;
 };
 

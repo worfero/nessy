@@ -1,20 +1,20 @@
-#include "../include/sram.h"
+#include "../include/ram.h"
 
 #include <cstdio>
 
-SRAM::SRAM(){
+RAM::RAM(){
 
 }
 
-uint8_t SRAM::read(uint16_t address){
+uint8_t RAM::read(uint16_t address){
     return memory[address & 0x07FF];
 }
 
-void SRAM::write(uint16_t address, uint8_t data){
+void RAM::write(uint16_t address, uint8_t data){
     memory[address & 0x07FF] = data;
 }
 
-void SRAM::printMemoryMap(uint16_t startAddr, uint16_t rows){
+void RAM::printMemoryMap(uint16_t startAddr, uint16_t rows){
     const uint16_t bytesPerRow = 8;
     uint16_t baseAddress = startAddr & 0xFFF8; // row allignment
 

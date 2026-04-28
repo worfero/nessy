@@ -1,14 +1,14 @@
-#ifndef SRAM_H
-#define SRAM_H
+#ifndef RAM_H
+#define RAM_H
 
 #include <cstdint>
 #include <array>
 
 #define RAM_SIZE 2048
 
-class SRAM{
+class RAM{
 public:
-    SRAM();
+    RAM();
 
     uint8_t read(uint16_t address);
     void write(uint16_t address, uint8_t data);

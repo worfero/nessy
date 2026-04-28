@@ -34,6 +34,7 @@ public:
 
     uint8_t getInstructionCycleCounter() const;
     uint64_t getCycleCount() const;
+    uint64_t getStepCount() const;
 
     void printRegisters() const;
     void printFlags() const;
@@ -64,6 +65,7 @@ private:
 
     uint8_t instructionCycles = 0;
     uint64_t cycleCount = 0;
+    uint64_t stepCount = 0;
     uint8_t opcode = 0;
 
     // operation helper functions

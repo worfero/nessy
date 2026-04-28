@@ -112,6 +112,8 @@ uint8_t CPU::IZX(){
     uint16_t loByte = bus.read(ptr++);
     uint16_t hiByte = bus.read(ptr & 0x00FF);
 
+    std::printf("\n\n%u %u\n\n", loByte, hiByte);
+
     fetchAddr = (hiByte << 8) | loByte;
 
     return 0;
@@ -925,6 +927,8 @@ void CPU::clock(){
         else{
             instructionCycles += (extraCycleCheck1 & extraCycleCheck2);
         }
+
+        stepCount++;
     }
 
     instructionCycles--;
@@ -961,6 +965,10 @@ uint8_t CPU::getInstructionCycleCounter() const{
 
 uint64_t CPU::getCycleCount() const{
     return cycleCount;
+}
+
+uint64_t CPU::getStepCount() const{
+    return stepCount;
 }
 
 uint8_t CPU::readBus(uint16_t address){

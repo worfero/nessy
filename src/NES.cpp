@@ -76,7 +76,7 @@ void NES::reset(){
 }
 
 void NES::printCycleCounts(){
-    std::printf("---------Cycles--------- \nSystem cycles: %lu \nCPU cycles: %lu\n\n", cycleCount, cpu.getCycleCount());
+    std::printf("---------Cycles--------- \nSystem cycles: %lu \nCPU cycles: %lu\nCPU Steps: %lu\n\n", cycleCount, getCpuCycleCount(), getCpuSteps());
 }
 
 void NES::setCpuFlag(CPU::StatusFlag flag, bool value){
@@ -87,8 +87,12 @@ bool NES::getCpuFlag(CPU::StatusFlag flag) const{
     return cpu.getFlag(flag);
 }
 
-uint8_t NES::getCpuCycleCount() const{
+uint64_t NES::getCpuCycleCount() const{
     return cpu.getCycleCount();
+}
+
+uint64_t NES::getCpuSteps() const{
+    return cpu.getStepCount();
 }
 
 void NES::printCpuRegisters(){

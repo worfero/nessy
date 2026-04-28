@@ -2,7 +2,7 @@
 #define NES_H
 
 #include "../include/cpu.h"
-#include "../include/sram.h"
+#include "../include/ram.h"
 #include "../include/bus.h"
 #include "../include/cartridge.h"
 
@@ -27,7 +27,8 @@ class NES {
         // CPU public functions
         void setCpuFlag(CPU::StatusFlag flag, bool value);
         bool getCpuFlag(CPU::StatusFlag flag) const;
-        uint8_t getCpuCycleCount() const;
+        uint64_t getCpuCycleCount() const;
+        uint64_t getCpuSteps() const;
         void printCpuRegisters();
         void printCpuFlags();
 
@@ -37,7 +38,7 @@ class NES {
     private:
         Bus bus;
         CPU cpu;
-        SRAM sram;
+        RAM sram;
         Cartridge cartridge;
 
         bool isRunning;
