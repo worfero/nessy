@@ -23,7 +23,7 @@ uint8_t Bus::read(uint16_t address){
         return sram->read(address & 0x07FF);
     }
     else if(address < APU_CONTROLS_START_ADDR){
-        return ppu->read(address & 0x2007);
+        return ppu->read(0x2000 + (address & 0x0007));
     }
     else if(address >= CARTRIDGE_START_ADDR && address <= MEMORY_MAP_SIZE){
         return cartridge->read(address);
@@ -37,9 +37,9 @@ void Bus::write(uint16_t address, uint8_t data){
         sram->write(address & 0x07FF, data);
     }
     else if(address < APU_CONTROLS_START_ADDR){
-        return ppu->write(address & 0x2007, data);
+        return ppu->write(0x2000 + (address & 0x0007), data);
     }
     else if(address >= CARTRIDGE_START_ADDR && address <= MEMORY_MAP_SIZE){
-        cartridge->write(address - CARTRIDGE_START_ADDR, data);
+        cartridge->write(address, data);
     }
 }

@@ -4,7 +4,7 @@
 #include <cstdint>
 #include <array>
 
-#define RAM_SIZE 2048
+#define RAM_SIZE 0x800
 
 class RAM{
 public:

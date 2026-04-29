@@ -39,14 +39,23 @@ uint8_t Cartridge::read(uint16_t address){
             address &= 0x3FFF;
         }
 
-        return memory[address];
+        return memory.at(address);
     }
 
     return 0;
 }
 
 void Cartridge::write(uint16_t address, uint8_t data){
-    memory[address] = data;
+    if(address >= 0x8000){
+        address -= 0x8000;
+
+        // mirroring
+        if(memory.size() == 0x4000){
+            address &= 0x3FFF;
+        }
+
+        memory.at(address) = data;
+    }
 }
 
 void Cartridge::printMemoryMap(uint16_t startAddr, uint16_t rows){
