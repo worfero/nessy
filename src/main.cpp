@@ -7,13 +7,12 @@ int main(){
     nes.printCycleCounts();
     nes.printCpuRegisters();
 
-    for(int i = 0; i < 100; i++){
+    for(int i = 0; i < 20; i++){
         nes.stepCpu();
         nes.printCycleCounts();
         nes.printCpuRegisters();
         nes.printCpuFlags();
-        nes.printMemoryMap(0x0010, 1);
-        nes.printMemoryMap(0x0020, 1);
+        nes.printMemoryMap(0x2000, 4);
     }
 
     return 0;

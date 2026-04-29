@@ -1,5 +1,4 @@
 #include "../include/cpu.h"
-#include "../include/bus.h"
 #include <cstdio>
 
 CPU::CPU(Bus &selec_bus) : bus(selec_bus){

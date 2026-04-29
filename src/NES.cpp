@@ -4,10 +4,12 @@
 
 NES::NES() : bus(), 
              cpu(bus),
+             ppu(),
              sram(),
              cartridge()
 {
     bus.connectSRAM(&sram);
+    bus.connectPPU(&ppu);
 
     isRunning = false;
 }
@@ -15,6 +17,7 @@ NES::NES() : bus(),
 void NES::powerOn(){
     cartridge.loadRomFile("test.nes");
     bus.connectCartridge(&cartridge);
+    ppu.connectCartridge(&cartridge);
     cpu.reset();
 }
 

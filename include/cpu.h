@@ -1,6 +1,8 @@
 #ifndef CPU_H
 #define CPU_H
 
+#include "../include/bus.h"
+
 #include <cstdint>
 #include <string>
 #include <array>

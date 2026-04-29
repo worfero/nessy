@@ -2,6 +2,7 @@
 #define NES_H
 
 #include "../include/cpu.h"
+#include "../include/ppu.h"
 #include "../include/ram.h"
 #include "../include/bus.h"
 #include "../include/cartridge.h"
@@ -38,6 +39,7 @@ class NES {
     private:
         Bus bus;
         CPU cpu;
+        PPU ppu;
         RAM sram;
         Cartridge cartridge;
 

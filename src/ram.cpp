@@ -7,11 +7,11 @@ RAM::RAM(){
 }
 
 uint8_t RAM::read(uint16_t address){
-    return memory[address & 0x07FF];
+    return memory[address];
 }
 
 void RAM::write(uint16_t address, uint8_t data){
-    memory[address & 0x07FF] = data;
+    memory[address] = data;
 }
 
 void RAM::printMemoryMap(uint16_t startAddr, uint16_t rows){
