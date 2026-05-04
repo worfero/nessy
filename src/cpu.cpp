@@ -31,33 +31,33 @@ uint8_t CPU::ACC(){
 }
 
 uint8_t CPU::ZP(){
-    fetchAddr = bus.read(registers.PC++);
+    fetchAddr = readBus(registers.PC++);
     fetchAddr &= 0x00FF;
     return 0;
 }
 
 uint8_t CPU::ZPX(){
-    fetchAddr = bus.read(registers.PC++);
+    fetchAddr = readBus(registers.PC++);
     fetchAddr = (fetchAddr + registers.X) & 0x00FF;
     return 0;
 }
 
 uint8_t CPU::ZPY(){
-    fetchAddr = bus.read(registers.PC++);
+    fetchAddr = readBus(registers.PC++);
     fetchAddr = (fetchAddr + registers.Y) & 0x00FF;
     return 0;
 }
 
 uint8_t CPU::ABS(){
-    uint16_t loByte = bus.read(registers.PC++);
-    uint16_t hiByte = bus.read(registers.PC++);
+    uint16_t loByte = readBus(registers.PC++);
+    uint16_t hiByte = readBus(registers.PC++);
     fetchAddr = (hiByte << 8) | loByte;
     return 0;
 }
 
 uint8_t CPU::ABX(){
-    uint16_t loByte = bus.read(registers.PC++);
-    uint16_t hiByte = bus.read(registers.PC++);
+    uint16_t loByte = readBus(registers.PC++);
+    uint16_t hiByte = readBus(registers.PC++);
 
     uint16_t baseAddr = (hiByte << 8) | loByte;
     fetchAddr = baseAddr + registers.X;
@@ -70,8 +70,8 @@ uint8_t CPU::ABX(){
 }
 
 uint8_t CPU::ABY(){
-    uint16_t loByte = bus.read(registers.PC++);
-    uint16_t hiByte = bus.read(registers.PC++);
+    uint16_t loByte = readBus(registers.PC++);
+    uint16_t hiByte = readBus(registers.PC++);
 
     uint16_t baseAddr = (hiByte << 8) | loByte;
     fetchAddr = baseAddr + registers.Y;
@@ -84,19 +84,19 @@ uint8_t CPU::ABY(){
 }
 
 uint8_t CPU::IND(){
-    uint16_t ptrLoByte = bus.read(registers.PC++);
-    uint16_t ptrHiByte = bus.read(registers.PC++);
+    uint16_t ptrLoByte = readBus(registers.PC++);
+    uint16_t ptrHiByte = readBus(registers.PC++);
     uint16_t ptr = (ptrHiByte << 8) | ptrLoByte;
 
-    uint16_t loByte = bus.read(ptr);
+    uint16_t loByte = readBus(ptr);
     uint16_t hiByte;
 
     // 6502 page boundary bug replication
     if(ptrLoByte == 0xFF){
-        hiByte = bus.read(ptr & 0xFF00);
+        hiByte = readBus(ptr & 0xFF00);
     }
     else{
-        hiByte = bus.read(ptr + 1);
+        hiByte = readBus(ptr + 1);
     }
 
     fetchAddr = (hiByte << 8) | loByte;
@@ -105,11 +105,11 @@ uint8_t CPU::IND(){
 }
 
 uint8_t CPU::IZX(){
-    uint16_t ptr = bus.read(registers.PC++);
+    uint16_t ptr = readBus(registers.PC++);
     ptr = (ptr + registers.X) & 0x00FF;
 
-    uint16_t loByte = bus.read(ptr++);
-    uint16_t hiByte = bus.read(ptr & 0x00FF);
+    uint16_t loByte = readBus(ptr++);
+    uint16_t hiByte = readBus(ptr & 0x00FF);
 
     std::printf("\n\n%u %u\n\n", loByte, hiByte);
 
@@ -119,10 +119,10 @@ uint8_t CPU::IZX(){
 }
 
 uint8_t CPU::IZY(){
-    uint16_t ptr = bus.read(registers.PC++);
+    uint16_t ptr = readBus(registers.PC++);
 
-    uint16_t loByte = bus.read(ptr & 0x00FF);
-    uint16_t hiByte = bus.read((ptr + 1) & 0x00FF);
+    uint16_t loByte = readBus(ptr & 0x00FF);
+    uint16_t hiByte = readBus((ptr + 1) & 0x00FF);
     uint16_t baseAddr = (hiByte << 8) | loByte;
 
     fetchAddr = baseAddr + registers.Y;
@@ -135,7 +135,7 @@ uint8_t CPU::IZY(){
 }
 
 uint8_t CPU::REL(){
-    int8_t addrOffset = bus.read(registers.PC++);
+    int8_t addrOffset = readBus(registers.PC++);
     fetchAddr = registers.PC + addrOffset;
 
     return 0;
@@ -163,17 +163,17 @@ uint8_t CPU::LDY(){
 }
 
 uint8_t CPU::STA(){
-    bus.write(fetchAddr, registers.A);
+    writeBus(fetchAddr, registers.A);
     return 0;
 }
 
 uint8_t CPU::STX(){
-    bus.write(fetchAddr, registers.X);
+    writeBus(fetchAddr, registers.X);
     return 0;
 }
 
 uint8_t CPU::STY(){
-    bus.write(fetchAddr, registers.Y);
+    writeBus(fetchAddr, registers.Y);
     return 0;
 }
 
@@ -884,7 +884,7 @@ uint8_t CPU::fetchValue(){
     if((instructions[opcode].addrMode == &CPU::ACC))
         return registers.A;
     else if(!(instructions[opcode].addrMode == &CPU::IMP))
-        return bus.read(fetchAddr);
+        return readBus(fetchAddr);
     return 0;
 }
 
@@ -892,27 +892,27 @@ void CPU::writebackValue(uint8_t value){
     if ((instructions[opcode].addrMode == &CPU::ACC))
         registers.A = value;
     else
-        bus.write(fetchAddr, value);
+        writeBus(fetchAddr, value);
 }
 
 void CPU::push(uint8_t value){
-    bus.write(0x0100 | registers.SP--, value);
+    writeBus(0x0100 | registers.SP--, value);
 }
 
 uint8_t CPU::pop(){
-    return bus.read(0x0100 | ++registers.SP);
+    return readBus(0x0100 | ++registers.SP);
 }
 
 uint16_t CPU::readVector(uint16_t vectorAddr){
-    uint8_t loByte = bus.read(vectorAddr);
-    uint8_t hiByte = bus.read(vectorAddr + 1);
+    uint8_t loByte = readBus(vectorAddr);
+    uint8_t hiByte = readBus(vectorAddr + 1);
     return (hiByte << 8) | loByte;
 }
 
 void CPU::clock(){
     // cycle countdown method, useful for timing but not precise to reality
     if(instructionCycles == 0){
-        opcode = bus.read(registers.PC++);
+        opcode = readBus(registers.PC++);
         Instruction &instruction = instructions[opcode];
 
         instructionCycles = instruction.cycleCount;

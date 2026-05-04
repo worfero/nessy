@@ -15,7 +15,6 @@ void PPU::connectCartridge(Cartridge *selec_cartridge){
 }
 
 uint8_t PPU::readReg(uint16_t addr){
-    std::printf("\n\nRead\n\n");
     switch(addr){
         case 0x2000:
             return registers.PPUCTRL;
@@ -76,7 +75,6 @@ void PPU::writeReg(uint16_t addr, uint8_t data){
                 ppuAddrLatch = true;
             }
             else{
-                std::printf("\n\n%u\n\n", fetchAddr);
                 fetchAddr = (tempFetchAddr | registers.PPUADDR) & 0x3FFF;
                 ppuAddrLatch = false;
             }
