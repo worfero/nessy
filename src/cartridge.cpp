@@ -22,58 +22,52 @@ bool Cartridge::loadRomFile(const std::string &filename){
         return false;
     }
 
+    // load pgrRom
     uint8_t prgRomSize = (uint8_t)header[4];
+    pgrRom.resize(prgRomSize * 0x4000);
+    file.read((char*)pgrRom.data(), pgrRom.size());
 
-    memory.resize(prgRomSize * 0x4000);
-    file.read((char*)memory.data(), memory.size());
+    // load chrRom
+    uint8_t chrRomSize = (uint8_t)header[5];
+
+    if(chrRomSize == 0){
+        allowChrWrite = true;
+        chrRom.assign(0x2000, 0x00);
+    }
+    else{
+        allowChrWrite = false;
+        chrRom.resize(chrRomSize * 0x2000);
+        file.read((char*)chrRom.data(), chrRom.size());
+    }
 
     return true;
 }
 
-uint8_t Cartridge::read(uint16_t address){
+uint8_t Cartridge::readPgr(uint16_t address){
     if(address >= 0x8000){
         address -= 0x8000;
 
         // mirroring
-        if(memory.size() == 0x4000){
+        if(pgrRom.size() == 0x4000){
             address &= 0x3FFF;
         }
 
-        return memory.at(address);
+        return pgrRom.at(address);
     }
 
     return 0;
 }
 
-void Cartridge::write(uint16_t address, uint8_t data){
-    if(address >= 0x8000){
-        address -= 0x8000;
-
-        // mirroring
-        if(memory.size() == 0x4000){
-            address &= 0x3FFF;
-        }
-
-        memory.at(address) = data;
+uint8_t Cartridge::readChr(uint16_t address){
+    if(address < 0x2000){
+        return chrRom.at(address);
     }
+
+    return 0;
 }
 
-void Cartridge::printMemoryMap(uint16_t startAddr, uint16_t rows){
-    const uint16_t bytesPerRow = 8;
-    uint16_t baseAddress = startAddr & 0xFFF8; // row allignment
-
-    for(uint16_t row = 0; row < rows; row++){
-        if(baseAddress < memory.size()){
-            std::printf("0x%04X: ", baseAddress);
-            for(uint16_t idx = 0; idx < bytesPerRow; idx++){
-                std::printf("0x%02X ", memory[baseAddress + idx]);
-            }
-            std::printf("\n");
-        } else{
-            break;
-        }
-
-        baseAddress += bytesPerRow;
+void Cartridge::writeChr(uint16_t address, uint8_t data){
+    if(address < 0x2000 && allowChrWrite){
+        chrRom.at(address) = data;
     }
-    std::printf("\n");
 }

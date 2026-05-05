@@ -12,6 +12,7 @@ int main(){
         nes.printCycleCounts();
         nes.printCpuRegisters();
         nes.printCpuFlags();
+        nes.printMemoryMap(0x0000, 1);
     }
 
     return 0;

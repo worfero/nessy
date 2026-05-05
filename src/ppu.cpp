@@ -40,12 +40,12 @@ uint8_t PPU::readReg(uint16_t addr){
             {
                 uint8_t value;
                 if(fetchAddr >= PALETTE_START_ADDR){
-                    value = readVram(fetchAddr);
-                    readBuffer = readVram(fetchAddr - 0x1000);
+                    value = read(fetchAddr);
+                    readBuffer = read(fetchAddr - 0x1000);
                 }
                 else{
                     value = readBuffer;
-                    readBuffer = readVram(fetchAddr);
+                    readBuffer = read(fetchAddr);
                 }
                 incrementFetchAddr();
                 return value;
@@ -90,7 +90,7 @@ void PPU::writeReg(uint16_t addr, uint8_t data){
             break;
         case 0x2007:
             registers.PPUDATA = data;
-            writeVram(fetchAddr, registers.PPUDATA);
+            write(fetchAddr, registers.PPUDATA);
             incrementFetchAddr();
             break;
 
@@ -110,16 +110,24 @@ void PPU::incrementFetchAddr(){
     fetchAddr &= 0x3FFF;
 }
 
-uint8_t PPU::readVram(uint16_t address){
-    if(address >= NAMETABLE_START_ADDR && address < PALETTE_START_ADDR){
+uint8_t PPU::read(uint16_t address){
+    if(address >= CHR_ROM_START_ADDR && address < NAMETABLE_START_ADDR){
+        return cartridge->readChr(address);
+    }
+    else if(address < PALETTE_START_ADDR){
+        if(address >= 0x3000) address -= 0x1000;
         return vram.read((address - NAMETABLE_START_ADDR) & 0x07FF);
     }
 
     return 0;
 }
 
-void PPU::writeVram(uint16_t address, uint8_t data){
-    if(address >= NAMETABLE_START_ADDR && address < PALETTE_START_ADDR){
+void PPU::write(uint16_t address, uint8_t data){
+    if(address >= CHR_ROM_START_ADDR && address < NAMETABLE_START_ADDR){
+        cartridge->writeChr(address, data);
+    }
+    else if(address < PALETTE_START_ADDR){
+        if(address >= 0x3000) address -= 0x1000;
         vram.write((address - NAMETABLE_START_ADDR) & 0x07FF, data);
     }
 }

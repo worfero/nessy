@@ -6,6 +6,7 @@
 
 #include <cstdint>
 
+#define CHR_ROM_START_ADDR      0x0000
 #define NAMETABLE_START_ADDR    0x2000
 #define PALETTE_START_ADDR      0x3F00
 
@@ -52,8 +53,8 @@ class PPU{
 
         Registers registers;
 
-        uint8_t readVram(uint16_t address);
-        void writeVram(uint16_t address, uint8_t data);
+        uint8_t read(uint16_t address);
+        void write(uint16_t address, uint8_t data);
 
         void incrementFetchAddr();
 };

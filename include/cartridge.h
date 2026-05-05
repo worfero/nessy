@@ -12,13 +12,16 @@ public:
 
     bool loadRomFile(const std::string &filename);
 
-    uint8_t read(uint16_t address);
-    void write(uint16_t address, uint8_t data);
+    uint8_t readPgr(uint16_t address);
 
-    void printMemoryMap(uint16_t startAddr, uint16_t rows);
+    uint8_t readChr(uint16_t address);
+    void writeChr(uint16_t address, uint8_t data);
 
 private:
-    std::vector<uint8_t> memory{};
+    std::vector<uint8_t> pgrRom{};
+    std::vector<uint8_t> chrRom{};
+
+    bool allowChrWrite = false;
 };
 
 #endif

@@ -26,7 +26,7 @@ uint8_t Bus::read(uint16_t address){
         return ppu->readReg(0x2000 + (address & 0x0007));
     }
     else if(address >= CARTRIDGE_START_ADDR && address <= MEMORY_MAP_SIZE){
-        return cartridge->read(address);
+        return cartridge->readPgr(address);
     }
 
     return 0;
@@ -38,8 +38,5 @@ void Bus::write(uint16_t address, uint8_t data){
     }
     else if(address < APU_CONTROLS_START_ADDR){
         ppu->writeReg(0x2000 + (address & 0x0007), data);
-    }
-    else if(address >= CARTRIDGE_START_ADDR && address <= MEMORY_MAP_SIZE){
-        cartridge->write(address, data);
     }
 }
