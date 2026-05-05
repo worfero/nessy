@@ -9,6 +9,7 @@
 #define CHR_ROM_START_ADDR      0x0000
 #define NAMETABLE_START_ADDR    0x2000
 #define PALETTE_START_ADDR      0x3F00
+#define MIRROR_START_ADDR       0x4000
 
 class Cartridge;
 
@@ -33,6 +34,8 @@ class PPU{
     private:
         RAM vram;
         Cartridge *cartridge;
+
+        std::array<uint8_t, 32> paletteRam{};
 
         struct Registers{
             uint8_t PPUCTRL;

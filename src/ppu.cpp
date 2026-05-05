@@ -118,6 +118,17 @@ uint8_t PPU::read(uint16_t address){
         if(address >= 0x3000) address -= 0x1000;
         return vram.read((address - NAMETABLE_START_ADDR) & 0x07FF);
     }
+    else if(address < MIRROR_START_ADDR){
+        address = (address - PALETTE_START_ADDR) & 0x001F;
+
+        // palette mirroring
+        if (address == 0x0010) address = 0x0000;
+        if (address == 0x0014) address = 0x0004;
+        if (address == 0x0018) address = 0x0008;
+        if (address == 0x001C) address = 0x000C;
+
+        return paletteRam.at(address);
+    }
 
     return 0;
 }
@@ -129,6 +140,17 @@ void PPU::write(uint16_t address, uint8_t data){
     else if(address < PALETTE_START_ADDR){
         if(address >= 0x3000) address -= 0x1000;
         vram.write((address - NAMETABLE_START_ADDR) & 0x07FF, data);
+    }
+    else if(address < MIRROR_START_ADDR){
+        address = (address - PALETTE_START_ADDR) & 0x001F;
+
+        // palette mirroring
+        if (address == 0x10) address = 0x00;
+        if (address == 0x14) address = 0x04;
+        if (address == 0x18) address = 0x08;
+        if (address == 0x1C) address = 0x0C;
+
+        paletteRam.at(address) = data;
     }
 }
 
