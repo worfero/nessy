@@ -48,6 +48,7 @@ class PPU{
         bool ppuAddrLatch;
         uint16_t tempFetchAddr;
         uint16_t fetchAddr;
+        uint8_t readBuffer;
 
         Registers registers;
 

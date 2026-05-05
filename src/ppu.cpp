@@ -8,6 +8,7 @@ PPU::PPU(){
     ppuAddrLatch = false;
     tempFetchAddr = 0x0000;
     fetchAddr = 0x0000;
+    readBuffer = 0x0000;
 }
 
 void PPU::connectCartridge(Cartridge *selec_cartridge){
@@ -37,9 +38,17 @@ uint8_t PPU::readReg(uint16_t addr){
             return registers.PPUADDR;
         case 0x2007:
             {
-                uint8_t value = readVram(fetchAddr);
+                uint8_t value;
+                if(fetchAddr >= PALETTE_START_ADDR){
+                    value = readVram(fetchAddr);
+                    readBuffer = readVram(fetchAddr - 0x1000);
+                }
+                else{
+                    value = readBuffer;
+                    readBuffer = readVram(fetchAddr);
+                }
                 incrementFetchAddr();
-                return value;   
+                return value;
             }
 
         default:
