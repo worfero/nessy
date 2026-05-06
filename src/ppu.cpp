@@ -10,6 +10,23 @@ PPU::PPU(){
     v_reg = 0x0000;
     x_reg = 0x00;
     readBuffer = 0x00;
+
+    cycle = 0;
+    scanline = -1;
+}
+
+void PPU::clock(){
+    cycle++;
+
+    if(cycle == 341){
+        cycle = 0;
+        scanline++;
+
+        if(scanline == 261) scanline = -1;
+    }
+
+    if(scanline == 241 && cycle == 1) setFlag(VBLANK, 1);
+    if(scanline == -1 && cycle == 1) setFlag(VBLANK, 0);
 }
 
 void PPU::connectCartridge(Cartridge *selec_cartridge){
@@ -176,6 +193,14 @@ void PPU::setFlag(StatusFlag flag, bool value){
 
 bool PPU::getFlag(StatusFlag flag) const{
     return (registers.PPUSTATUS & flag) != 0;
+}
+
+uint16_t PPU::getCycle() const{
+    return cycle;
+}
+
+int16_t PPU::getScanline() const{
+    return scanline;
 }
 
 bool PPU::getW() const{

@@ -70,6 +70,8 @@ void NES::clock(){
         cpuClock = false;
     }
 
+    ppu.clock();
+
     cycleCount++;
 }
 
@@ -79,7 +81,8 @@ void NES::reset(){
 }
 
 void NES::printCycleCounts(){
-    std::printf("---------Cycles--------- \nSystem cycles: %lu \nCPU cycles: %lu\nCPU Steps: %lu\n\n", cycleCount, getCpuCycleCount(), getCpuSteps());
+    std::printf("---------Cycles--------- \nSystem clocks: %lu \nCPU clocks: %lu\nCPU Steps: %lu\nPPU Cycle: %u\nPPU Scanline: %d\n\n",
+                    cycleCount, getCpuCycleCount(), getCpuSteps(), getPpuCycle(), getPpuScanline());
 }
 
 void NES::setCpuFlag(CPU::StatusFlag flag, bool value){
@@ -104,6 +107,14 @@ void NES::printCpuRegisters(){
 
 void NES::printCpuFlags(){
     cpu.printFlags();
+}
+
+uint16_t NES::getPpuCycle(){
+    return ppu.getCycle();
+}
+
+int16_t NES::getPpuScanline(){
+    return ppu.getScanline();
 }
 
 void NES::printPpuState(){

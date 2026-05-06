@@ -25,6 +25,8 @@ class PPU{
 
         void connectCartridge(Cartridge *selec_cartridge);
 
+        void clock();
+
         void setFlag(StatusFlag flag, bool value);
         bool getFlag(StatusFlag flag) const;
 
@@ -35,6 +37,9 @@ class PPU{
         uint16_t getT() const;
         uint16_t getV() const;
         uint8_t getX() const;
+
+        uint16_t getCycle() const;
+        int16_t getScanline() const;
 
         void printState();
 
@@ -56,11 +61,16 @@ class PPU{
             uint8_t OAMDMA;
         };
 
+        // state registers
         bool w_latch;
         uint16_t t_reg;
         uint16_t v_reg;
         uint8_t x_reg;
         uint8_t readBuffer;
+
+        // cycle variables
+        uint16_t cycle;
+        int16_t scanline;
 
         Registers registers;
 

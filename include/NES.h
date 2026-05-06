@@ -35,6 +35,8 @@ class NES {
 
         // PPU public functions
         void printPpuState();
+        uint16_t getPpuCycle();
+        int16_t getPpuScanline();
 
         // memory public functions
         void printMemoryMap(uint16_t startAddr, uint16_t rows);
