@@ -31,6 +31,13 @@ class PPU{
         uint8_t readReg(uint16_t addr);
         void writeReg(uint16_t addr, uint8_t data);
 
+        bool getW() const;
+        uint16_t getT() const;
+        uint16_t getV() const;
+        uint8_t getX() const;
+
+        void printState();
+
     private:
         RAM vram;
         Cartridge *cartridge;
@@ -49,9 +56,10 @@ class PPU{
             uint8_t OAMDMA;
         };
 
-        bool ppuAddrLatch;
-        uint16_t tempFetchAddr;
-        uint16_t fetchAddr;
+        bool w_latch;
+        uint16_t t_reg;
+        uint16_t v_reg;
+        uint8_t x_reg;
         uint8_t readBuffer;
 
         Registers registers;

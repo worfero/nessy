@@ -33,6 +33,9 @@ class NES {
         void printCpuRegisters();
         void printCpuFlags();
 
+        // PPU public functions
+        void printPpuState();
+
         // memory public functions
         void printMemoryMap(uint16_t startAddr, uint16_t rows);
 

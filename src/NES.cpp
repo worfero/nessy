@@ -106,6 +106,10 @@ void NES::printCpuFlags(){
     cpu.printFlags();
 }
 
+void NES::printPpuState(){
+    ppu.printState();
+}
+
 void NES::printMemoryMap(uint16_t startAddr, uint16_t rows){
     const uint16_t bytesPerRow = 8;
     uint16_t baseAddress = startAddr & 0xFFF8; // row allignment

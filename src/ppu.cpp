@@ -5,10 +5,11 @@ PPU::PPU(){
     registers.PPUCTRL = registers.PPUMASK = registers.PPUSTATUS = registers.OAMADDR = registers.OAMDATA = registers.PPUSCROLL =
     registers.PPUADDR = registers.PPUDATA = registers.OAMDMA = 0;
 
-    ppuAddrLatch = false;
-    tempFetchAddr = 0x0000;
-    fetchAddr = 0x0000;
-    readBuffer = 0x0000;
+    w_latch = false;
+    t_reg = 0x0000;
+    v_reg = 0x0000;
+    x_reg = 0x00;
+    readBuffer = 0x00;
 }
 
 void PPU::connectCartridge(Cartridge *selec_cartridge){
@@ -25,7 +26,7 @@ uint8_t PPU::readReg(uint16_t addr){
             {
                 uint8_t sts = registers.PPUSTATUS;
                 setFlag(VBLANK, false);
-                ppuAddrLatch = false;
+                w_latch = false;
                 return sts;
             }
         case 0x2003:
@@ -39,13 +40,13 @@ uint8_t PPU::readReg(uint16_t addr){
         case 0x2007:
             {
                 uint8_t value;
-                if(fetchAddr >= PALETTE_START_ADDR){
-                    value = read(fetchAddr);
-                    readBuffer = read(fetchAddr - 0x1000);
+                if(v_reg >= PALETTE_START_ADDR){
+                    value = read(v_reg);
+                    readBuffer = read(v_reg - 0x1000);
                 }
                 else{
                     value = readBuffer;
-                    readBuffer = read(fetchAddr);
+                    readBuffer = read(v_reg);
                 }
                 incrementFetchAddr();
                 return value;
@@ -75,22 +76,34 @@ void PPU::writeReg(uint16_t addr, uint8_t data){
             break;
         case 0x2005:
             registers.PPUSCROLL = data;
+
+            if(!w_latch){
+                x_reg = registers.PPUSCROLL & 0x07;
+                t_reg = (t_reg & 0xFFE0) | (registers.PPUSCROLL >> 3);
+                w_latch = true;
+            }
+            else{
+                t_reg = (t_reg & 0x8FFF) | ((registers.PPUSCROLL & 0x07) << 12);
+                t_reg = (t_reg & 0xFC1F) | ((registers.PPUSCROLL & 0xF8) << 2);
+                w_latch = false;
+            }
             break;
         case 0x2006:
             registers.PPUADDR = data;
 
-            if(!ppuAddrLatch){
-                tempFetchAddr = registers.PPUADDR << 8;
-                ppuAddrLatch = true;
+            if(!w_latch){
+                t_reg = (t_reg & 0x00FF) | ((registers.PPUADDR & 0x3F) << 8);
+                w_latch = true;
             }
             else{
-                fetchAddr = (tempFetchAddr | registers.PPUADDR) & 0x3FFF;
-                ppuAddrLatch = false;
+                t_reg = (t_reg & 0xFF00) | registers.PPUADDR;
+                v_reg = t_reg;
+                w_latch = false;
             }
             break;
         case 0x2007:
             registers.PPUDATA = data;
-            write(fetchAddr, registers.PPUDATA);
+            write(v_reg, registers.PPUDATA);
             incrementFetchAddr();
             break;
 
@@ -101,13 +114,13 @@ void PPU::writeReg(uint16_t addr, uint8_t data){
 
 void PPU::incrementFetchAddr(){
     if(registers.PPUCTRL & 0x04){
-        fetchAddr += 0x20;
+        v_reg += 0x20;
     }
     else{
-        fetchAddr++;
+        v_reg++;
     }
 
-    fetchAddr &= 0x3FFF;
+    v_reg &= 0x3FFF;
 }
 
 uint8_t PPU::read(uint16_t address){
@@ -163,4 +176,24 @@ void PPU::setFlag(StatusFlag flag, bool value){
 
 bool PPU::getFlag(StatusFlag flag) const{
     return (registers.PPUSTATUS & flag) != 0;
+}
+
+bool PPU::getW() const{
+    return w_latch;
+}
+
+uint16_t PPU::getT() const{
+    return t_reg;
+}
+
+uint16_t PPU::getV() const{
+    return v_reg;
+}
+
+uint8_t PPU::getX() const{
+    return x_reg;
+}
+
+void PPU::printState(){
+    std::printf("-------PPU State------- \nW: %d \nT: 0x%04X \nV: 0x%04X \nX: 0x%02X \n\n", getW(), getT(), getV(), getX());
 }
