@@ -62,6 +62,9 @@ void NES::stop(){
 }
 
 void NES::clock(){
+    if(cycleCount == 40){
+        cpu.requestNMI();
+    }
     if(cycleCount % 3 == 0){
         cpu.clock();
         cpuClock = true;
@@ -81,8 +84,8 @@ void NES::reset(){
 }
 
 void NES::printCycleCounts(){
-    std::printf("---------Cycles--------- \nSystem clocks: %lu \nCPU clocks: %lu\nCPU Steps: %lu\nPPU Cycle: %u\nPPU Scanline: %d\n\n",
-                    cycleCount, getCpuCycleCount(), getCpuSteps(), getPpuCycle(), getPpuScanline());
+    std::printf("---------Cycles--------- \nSystem clocks: %lu \nCPU clocks: %lu\nCPU Steps: %lu\nPPU Cycle: %u\nPPU Scanline: %d\nNMI: %d\n\n",
+                    cycleCount, getCpuCycleCount(), getCpuSteps(), getPpuCycle(), getPpuScanline(), cpu.nmi);
 }
 
 void NES::setCpuFlag(CPU::StatusFlag flag, bool value){

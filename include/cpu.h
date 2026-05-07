@@ -28,16 +28,28 @@ public:
 
     CPU(Bus &bus);
 
+    bool nmi = false;
+    bool irq = false;
+
+    // hardware interrupt functions
+    bool getNMI() const;
+    bool getIRQ() const;
+    void requestNMI();
+    void requestIRQ();
+
+    // clock functions
     void clock();
     void reset();
-
-    void setFlag(StatusFlag flag, bool value);
-    bool getFlag(StatusFlag flag) const;
 
     uint8_t getInstructionCycleCounter() const;
     uint64_t getCycleCount() const;
     uint64_t getStepCount() const;
 
+    // flag functions
+    void setFlag(StatusFlag flag, bool value);
+    bool getFlag(StatusFlag flag) const;
+
+    // print functions
     void printRegisters() const;
     void printFlags() const;
 
@@ -69,11 +81,12 @@ private:
     uint64_t cycleCount = 0;
     uint64_t stepCount = 0;
     uint8_t opcode = 0;
+    uint16_t fetchAddr = 0;
 
     // operation helper functions
     uint8_t fetchValue();
     void writebackValue(uint8_t value);
-    uint16_t fetchAddr = 0;
+    void handleNMI();
 
     // stack functions
     void push(uint8_t value);
@@ -162,7 +175,6 @@ private:
     uint8_t ANC2();
     uint8_t ANE();
     uint8_t ARR();
-    
 
     void fillOpcodes();
 

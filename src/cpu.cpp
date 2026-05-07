@@ -912,22 +912,29 @@ uint16_t CPU::readVector(uint16_t vectorAddr){
 void CPU::clock(){
     // cycle countdown method, useful for timing but not precise to reality
     if(instructionCycles == 0){
-        opcode = readBus(registers.PC++);
-        Instruction &instruction = instructions[opcode];
-
-        instructionCycles = instruction.cycleCount;
-
-        uint8_t extraCycleCheck1 = (this->*instruction.addrMode)();
-        uint8_t extraCycleCheck2 = (this->*instruction.operation)();
-
-        if(instruction.isBranch){
-            instructionCycles += extraCycleCheck2;
+        if(nmi){
+            nmi = false;
+            handleNMI();
+            instructionCycles = 7;
         }
         else{
-            instructionCycles += (extraCycleCheck1 & extraCycleCheck2);
-        }
+            opcode = readBus(registers.PC++);
+            Instruction &instruction = instructions[opcode];
 
-        stepCount++;
+            instructionCycles = instruction.cycleCount;
+
+            uint8_t extraCycleCheck1 = (this->*instruction.addrMode)();
+            uint8_t extraCycleCheck2 = (this->*instruction.operation)();
+
+            if(instruction.isBranch){
+                instructionCycles += extraCycleCheck2;
+            }
+            else{
+                instructionCycles += (extraCycleCheck1 & extraCycleCheck2);
+            }
+
+            stepCount++;
+        }
     }
 
     instructionCycles--;
@@ -945,6 +952,34 @@ void CPU::reset(){
 
     instructionCycles = 0;
     opcode = 0;
+}
+
+void CPU::handleNMI(){
+    uint16_t returnPC = registers.PC;
+    uint8_t loByte = returnPC & 0xFF;
+    uint8_t hiByte = (returnPC >> 8) & 0xFF;
+    push(hiByte);
+    push(loByte);
+    push((registers.P & ~BREAK) | UNUSED);
+    setFlag(INTERRUPT, true);
+
+    registers.PC = readVector(NMI);
+}
+
+bool CPU::getNMI() const{
+    return nmi;
+}
+
+bool CPU::getIRQ() const{
+    return irq;
+}
+
+void CPU::requestNMI(){
+    nmi = true;
+}
+
+void CPU::requestIRQ(){
+    irq = true;
 }
 
 void CPU::setFlag(StatusFlag flag, bool value){
