@@ -10,6 +10,7 @@ NES::NES() : bus(),
 {
     bus.connectSRAM(&sram);
     bus.connectPPU(&ppu);
+    ppu.connectCPU(&cpu);
 
     isRunning = false;
 }
@@ -62,9 +63,6 @@ void NES::stop(){
 }
 
 void NES::clock(){
-    if(cycleCount == 40){
-        cpu.requestNMI();
-    }
     if(cycleCount % 3 == 0){
         cpu.clock();
         cpuClock = true;

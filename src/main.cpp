@@ -7,8 +7,9 @@ int main(){
     nes.printCycleCounts();
     nes.printCpuRegisters();
 
-    for(int i = 0; i < 100; i++){
-        nes.stepCpu();
+    for(int i = 0; i < 1000; i++){
+        //nes.stepCpu();
+        nes.clock();
         nes.printCycleCounts();
         nes.printCpuRegisters();
         nes.printPpuState();

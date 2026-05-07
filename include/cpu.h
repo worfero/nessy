@@ -40,7 +40,6 @@ public:
     // clock functions
     void clock();
     void reset();
-
     uint8_t getInstructionCycleCounter() const;
     uint64_t getCycleCount() const;
     uint64_t getStepCount() const;

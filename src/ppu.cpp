@@ -12,10 +12,18 @@ PPU::PPU(){
     readBuffer = 0x00;
 
     cycle = 0;
-    scanline = -1;
+    scanline = 240;
 }
 
 void PPU::clock(){
+    if(scanline >= -1 && scanline < 240 && cycle == 257){
+        updateHorizontalBits();
+    }
+
+    if(scanline == -1 && cycle >= 280 && cycle < 305){
+        updateVerticalBits();
+    }
+
     cycle++;
 
     if(cycle == 341){
@@ -25,12 +33,30 @@ void PPU::clock(){
         if(scanline == 261) scanline = -1;
     }
 
-    if(scanline == 241 && cycle == 1) setFlag(VBLANK, 1);
+    if(scanline == 241 && cycle == 1) {
+        setFlag(VBLANK, 1);
+        if((registers.PPUCTRL & 0x80) != 0){
+            cpu->requestNMI();
+        }
+    }
+
     if(scanline == -1 && cycle == 1) setFlag(VBLANK, 0);
+}
+
+void PPU::updateHorizontalBits(){
+    v_reg = (v_reg & 0x7DE0) | (t_reg & 0x041F);
+}
+
+void PPU::updateVerticalBits(){
+    v_reg = (v_reg & 0x841F) | (t_reg & 0x7BE0);
 }
 
 void PPU::connectCartridge(Cartridge *selec_cartridge){
     cartridge = selec_cartridge;
+}
+
+void PPU::connectCPU(CPU *selec_cpu){
+    cpu = selec_cpu;
 }
 
 uint8_t PPU::readReg(uint16_t addr){

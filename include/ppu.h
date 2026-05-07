@@ -3,6 +3,7 @@
 
 #include "../include/ram.h"
 #include "../include/cartridge.h"
+#include "../include/cpu.h"
 
 #include <cstdint>
 
@@ -12,6 +13,7 @@
 #define MIRROR_START_ADDR       0x4000
 
 class Cartridge;
+class CPU;
 
 class PPU{
     public:
@@ -24,6 +26,7 @@ class PPU{
         };
 
         void connectCartridge(Cartridge *selec_cartridge);
+        void connectCPU(CPU *selec_cpu);
 
         void clock();
 
@@ -46,6 +49,7 @@ class PPU{
     private:
         RAM vram;
         Cartridge *cartridge;
+        CPU *cpu;
 
         std::array<uint8_t, 32> paletteRam{};
 
@@ -71,6 +75,10 @@ class PPU{
         // cycle variables
         uint16_t cycle;
         int16_t scanline;
+
+        // operational functions
+        void updateVerticalBits();
+        void updateHorizontalBits();
 
         Registers registers;
 
