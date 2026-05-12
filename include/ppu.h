@@ -12,6 +12,8 @@
 #define PALETTE_START_ADDR      0x3F00
 #define MIRROR_START_ADDR       0x4000
 
+#define FINE_Y                  ((v_reg >> 12) & 0x07)
+
 class Cartridge;
 class CPU;
 
@@ -44,7 +46,9 @@ class PPU{
         uint16_t getCycle() const;
         int16_t getScanline() const;
 
+        void printRegisters();
         void printState();
+        void printCurrentTile();
 
     private:
         RAM vram;
@@ -72,6 +76,12 @@ class PPU{
         uint8_t x_reg;
         uint8_t readBuffer;
 
+        // tile rendering registers
+        uint8_t nextTileID;
+        uint8_t nextAttribute;
+        uint8_t lowBitPattern;
+        uint8_t hiBitPattern;
+
         // cycle variables
         uint16_t cycle;
         int16_t scanline;
@@ -86,6 +96,7 @@ class PPU{
         void write(uint16_t address, uint8_t data);
 
         void incrementFetchAddr();
+        void incrementCoarseX();
 };
 
 #endif

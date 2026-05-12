@@ -118,8 +118,16 @@ int16_t NES::getPpuScanline(){
     return ppu.getScanline();
 }
 
+void NES::printPpuRegisters(){
+    ppu.printRegisters();
+}
+
 void NES::printPpuState(){
     ppu.printState();
+}
+
+void NES::printPpuTileFetch(){
+    ppu.printCurrentTile();
 }
 
 void NES::printMemoryMap(uint16_t startAddr, uint16_t rows){

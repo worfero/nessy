@@ -1014,7 +1014,7 @@ void CPU::writeBus(uint16_t address, uint8_t data){
 }
 
 void CPU::printRegisters() const{
-    std::printf("--------Registers-------- \nA: 0x%02X \nX: 0x%02X \nY: 0x%02X \nSP: 0x%02X \nP: 0x%02X \nPC: 0x%04X\n\n",
+    std::printf("--------CPU Registers-------- \nA: 0x%02X \nX: 0x%02X \nY: 0x%02X \nSP: 0x%02X \nP: 0x%02X \nPC: 0x%04X\n\n",
                 registers.A, registers.X, registers.Y, registers.SP, registers.P, registers.PC);
 }
 

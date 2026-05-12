@@ -11,17 +11,54 @@ PPU::PPU(){
     x_reg = 0x00;
     readBuffer = 0x00;
 
+    nextTileID = 0;
+    nextAttribute = 0;
+    lowBitPattern = 0;
+    hiBitPattern = 0;
+
     cycle = 0;
-    scanline = 240;
+    scanline = -1;
 }
 
 void PPU::clock(){
-    if(scanline >= -1 && scanline < 240 && cycle == 257){
-        updateHorizontalBits();
-    }
+    if((registers.PPUMASK & 0x08) > 0){
+        if(scanline >= -1 && scanline < 240 && cycle == 257){
+            updateHorizontalBits();
+        }
 
-    if(scanline == -1 && cycle >= 280 && cycle < 305){
-        updateVerticalBits();
+        if(scanline == -1 && cycle >= 280 && cycle < 305){
+            updateVerticalBits();
+        }
+
+        if(scanline >= -1 && scanline < 240 && cycle > 0 && cycle <= 256){
+            uint16_t patternBase = (registers.PPUCTRL & 0x10) ? 0x1000 : 0x0000;
+
+            // 8-cycle fetch routine
+            switch(cycle % 8){
+                case 0:
+                    incrementCoarseX();
+                    break;
+                    
+                case 1:
+                    nextTileID = read(0x2000 | (v_reg & 0x0FFF));
+                    break;
+
+                case 3:
+                    nextAttribute = read(0x23C0 | (v_reg & 0x0C00) | ((v_reg >> 4) & 0x38) | ((v_reg >> 2) & 0x07));
+                    break;
+                
+                case 5:
+                    lowBitPattern = read(patternBase + (nextTileID * 16) + FINE_Y);
+                    break;
+
+                case 7:
+                    hiBitPattern = read(patternBase + (nextTileID * 16) + FINE_Y + 8);
+                    break;
+
+                default:
+                    break;
+            }
+        }
     }
 
     cycle++;
@@ -166,6 +203,16 @@ void PPU::incrementFetchAddr(){
     v_reg &= 0x3FFF;
 }
 
+void PPU::incrementCoarseX(){
+    if((v_reg & 0x001F) == 0x001F){
+        v_reg &= 0xFFE0;
+        v_reg ^= 0x0400;
+    }
+    else{
+        v_reg++;
+    }
+}
+
 uint8_t PPU::read(uint16_t address){
     if(address >= CHR_ROM_START_ADDR && address < NAMETABLE_START_ADDR){
         return cartridge->readChr(address);
@@ -245,6 +292,17 @@ uint8_t PPU::getX() const{
     return x_reg;
 }
 
+void PPU::printRegisters(){
+    std::printf("--------PPU Registers-------- \nPPUCTRL: 0x%02X \nPPUMASK: 0x%02X \nPPUSTATUS: 0x%02X \nOAMADDR: 0x%02X \nOAMDATA: 0x%02X \nPPUSCROLL: 0x%02X\nPPUADDR: 0x%02X\nPPUDATA: 0x%02X\nOAMDMA: 0x%02X\n\n",
+                registers.PPUCTRL, registers.PPUMASK, registers.PPUSTATUS, registers.OAMADDR, registers.OAMDATA, registers.PPUSCROLL,
+                registers.PPUADDR, registers.PPUDATA, registers.OAMDMA);
+}
+
 void PPU::printState(){
     std::printf("-------PPU State------- \nW: %d \nT: 0x%04X \nV: 0x%04X \nX: 0x%02X \n\n", getW(), getT(), getV(), getX());
+}
+
+void PPU::printCurrentTile(){
+    std::printf("-------PPU Tiles------- \nnextTileID: 0x%02X \nnextAttribute: 0x%02X \nlowBitPattern: 0x%02X \nhiBitPattern: 0x%02X \n\n",
+                nextTileID, nextAttribute, lowBitPattern, hiBitPattern);
 }

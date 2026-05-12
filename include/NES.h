@@ -34,7 +34,9 @@ class NES {
         void printCpuFlags();
 
         // PPU public functions
+        void printPpuRegisters();
         void printPpuState();
+        void printPpuTileFetch();
         uint16_t getPpuCycle();
         int16_t getPpuScanline();
 

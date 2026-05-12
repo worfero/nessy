@@ -4,15 +4,15 @@ int main(){
     NES nes;
     nes.powerOn();
 
-    nes.printCycleCounts();
-    nes.printCpuRegisters();
+    for(int i = 0; i < 179025; i++){
+        nes.clock();
+    }
 
-    for(int i = 0; i < 1000; i++){
-        //nes.stepCpu();
+    for(int i = 0; i < 340*2; i++){
         nes.clock();
         nes.printCycleCounts();
-        nes.printCpuRegisters();
         nes.printPpuState();
+        nes.printPpuTileFetch();
     }
 
     return 0;
