@@ -16,6 +16,13 @@ PPU::PPU(){
     lowBitPattern = 0;
     hiBitPattern = 0;
 
+    bgPatternLowBits = 0;
+    bgPatternHiBits = 0;
+    bgAttributeLowBits = 0;
+    bgAttributeHiBits = 0;
+
+    paletteAddress = 0;
+
     cycle = 0;
     scanline = -1;
 }
@@ -32,10 +39,21 @@ void PPU::clock(){
 
         if(scanline >= -1 && scanline < 240 && cycle > 0 && cycle <= 256){
             uint16_t patternBase = (registers.PPUCTRL & 0x10) ? 0x1000 : 0x0000;
+            uint8_t colorSelect = 0;
 
             // 8-cycle fetch routine
             switch(cycle % 8){
                 case 0:
+                    bgPatternLowBits = (bgPatternLowBits & 0xFF00) | lowBitPattern;
+                    bgPatternHiBits = (bgPatternHiBits & 0xFF00) | hiBitPattern;
+
+                    colorSelect = nextAttribute;
+                    if(v_reg & 0x40) colorSelect >>= 4;
+                    if(v_reg & 0x02) colorSelect >>= 2;
+                    colorSelect &= 0x03;
+                    bgAttributeLowBits = (colorSelect & 0x01) ? (bgAttributeLowBits & 0xFF00) | 0x00FF : (bgAttributeLowBits & 0xFF00) | 0x0000;
+                    bgAttributeHiBits = (colorSelect & 0x02) ? (bgAttributeHiBits & 0xFF00) | 0x00FF : (bgAttributeHiBits & 0xFF00) | 0x0000;
+
                     incrementCoarseX();
                     break;
                     
@@ -58,6 +76,28 @@ void PPU::clock(){
                 default:
                     break;
             }
+
+            uint16_t bitMux = 0x8000 >> x_reg;
+
+            uint8_t p0 = (bgPatternLowBits & bitMux) ? 1 : 0;
+            uint8_t p1 = (bgPatternHiBits  & bitMux) ? 1 : 0;
+            uint8_t a0 = (bgAttributeLowBits & bitMux) ? 1 : 0;
+            uint8_t a1 = (bgAttributeHiBits  & bitMux) ? 1 : 0;
+
+            uint8_t palette = (a1 << 1) | a0;
+            uint8_t pixel = (p1 << 1) | p0;
+
+            if(pixel == 0){
+                paletteAddress = PALETTE_START_ADDR;
+            }
+            else{
+                paletteAddress = PALETTE_START_ADDR + (palette * 4) + pixel;
+            }
+
+            bgAttributeLowBits <<= 1;
+            bgAttributeHiBits <<= 1;
+            bgPatternLowBits <<= 1;
+            bgPatternHiBits <<= 1;
         }
     }
 
@@ -303,6 +343,6 @@ void PPU::printState(){
 }
 
 void PPU::printCurrentTile(){
-    std::printf("-------PPU Tiles------- \nnextTileID: 0x%02X \nnextAttribute: 0x%02X \nlowBitPattern: 0x%02X \nhiBitPattern: 0x%02X \n\n",
-                nextTileID, nextAttribute, lowBitPattern, hiBitPattern);
+    std::printf("-------PPU Tiles------- \nnextTileID: 0x%02X \nnextAttribute: 0x%02X \nlowBitPattern: 0x%02X \nhiBitPattern: 0x%02X\npaletteAddr: 0x%04X \n\n",
+                nextTileID, nextAttribute, lowBitPattern, hiBitPattern, paletteAddress);
 }

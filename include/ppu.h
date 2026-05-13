@@ -76,11 +76,20 @@ class PPU{
         uint8_t x_reg;
         uint8_t readBuffer;
 
-        // tile rendering registers
+        // tile fetch registers
         uint8_t nextTileID;
         uint8_t nextAttribute;
         uint8_t lowBitPattern;
         uint8_t hiBitPattern;
+
+        // shift registers
+        uint16_t bgPatternLowBits;
+        uint16_t bgPatternHiBits;
+        uint16_t bgAttributeLowBits;
+        uint16_t bgAttributeHiBits;
+        
+        // graphic generation registers
+        uint16_t paletteAddress;
 
         // cycle variables
         uint16_t cycle;
