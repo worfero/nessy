@@ -37,7 +37,7 @@ void PPU::clock(){
             updateVerticalBits();
         }
 
-        if(scanline >= -1 && scanline < 240 && cycle > 0 && cycle <= 256){
+        if(scanline >= -1 && scanline < 240 && ((cycle > 0 && cycle <= 256) || (cycle > 320 && cycle <= 336))){
             uint16_t patternBase = (registers.PPUCTRL & 0x10) ? 0x1000 : 0x0000;
             uint8_t colorSelect = 0;
 
@@ -94,6 +94,11 @@ void PPU::clock(){
             }
             else{
                 paletteAddress = PALETTE_START_ADDR + (palette * 4) + pixel;
+            }
+
+            if(scanline >= 0 && scanline < 240 && cycle > 0 && cycle <= 256){
+                RGB pixelColor = nesPalette[read(paletteAddress) & 0x3F];
+                framebuffer.at((scanline * 256) + cycle - 1) = pixelColor;   
             }
 
             bgAttributeLowBits <<= 1;
