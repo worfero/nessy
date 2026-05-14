@@ -106,6 +106,8 @@ class PPU{
 
         void incrementFetchAddr();
         void incrementCoarseX();
+        void incrementFineY();
+        void incrementCoarseY();
 };
 
 #endif

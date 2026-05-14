@@ -77,6 +77,8 @@ void PPU::clock(){
                     break;
             }
 
+            if(cycle == 256) incrementFineY();
+
             uint16_t bitMux = 0x8000 >> x_reg;
 
             uint8_t p0 = (bgPatternLowBits & bitMux) ? 1 : 0;
@@ -250,6 +252,29 @@ void PPU::incrementCoarseX(){
     }
     else{
         v_reg++;
+    }
+}
+
+void PPU::incrementFineY(){
+    if((v_reg & 0x7000) == 0x7000){
+        v_reg &= 0x8FFF;
+        incrementCoarseY();
+    }
+    else{
+        v_reg += 0x1000;
+    }
+}
+
+void PPU::incrementCoarseY(){
+    if((v_reg & 0x03E0) == 0x03A0){
+        v_reg &= 0xFC1F;
+        v_reg ^= 0x0800;
+    }
+    else if((v_reg & 0x03E0) == 0x03E0){
+        v_reg &= 0xFC1F;
+    }
+    else{
+        v_reg += 0x0020;
     }
 }
 
