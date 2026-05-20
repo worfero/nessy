@@ -25,6 +25,8 @@ PPU::PPU(){
 
     cycle = 0;
     scanline = -1;
+
+    frameComplete = false;
 }
 
 void PPU::clock(){
@@ -97,7 +99,7 @@ void PPU::clock(){
             }
 
             if(scanline >= 0 && scanline < 240 && cycle > 0 && cycle <= 256){
-                RGB pixelColor = nesPalette[read(paletteAddress) & 0x3F];
+                uint32_t pixelColor = nesPalette[read(paletteAddress) & 0x3F];
                 framebuffer.at((scanline * 256) + cycle - 1) = pixelColor;   
             }
 
@@ -122,13 +124,16 @@ void PPU::clock(){
         if((registers.PPUCTRL & 0x80) != 0){
             cpu->requestNMI();
         }
+
+        frameComplete = true;
     }
 
     if(scanline == -1 && cycle == 1) setFlag(VBLANK, 0);
 }
 
 void PPU::updateHorizontalBits(){
-    v_reg = (v_reg & 0x7DE0) | (t_reg & 0x041F);
+    // clear the 
+    v_reg = (v_reg & 0x7BE0) | (t_reg & 0x041F);
 }
 
 void PPU::updateVerticalBits(){
@@ -325,6 +330,10 @@ void PPU::write(uint16_t address, uint8_t data){
 
         paletteRam.at(address) = data;
     }
+}
+
+uint32_t *PPU::getFramebuffer(){
+    return framebuffer.data();
 }
 
 void PPU::setFlag(StatusFlag flag, bool value){

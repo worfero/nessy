@@ -32,6 +32,8 @@ class NES {
         uint64_t getCpuSteps() const;
         void printCpuRegisters();
         void printCpuFlags();
+        bool isFrameComplete();
+        void nextFrame();
 
         // PPU public functions
         void printPpuRegisters();
@@ -39,6 +41,7 @@ class NES {
         void printPpuTileFetch();
         uint16_t getPpuCycle();
         int16_t getPpuScanline();
+        uint32_t *getPpuFramebuffer();
 
         // memory public functions
         void printMemoryMap(uint16_t startAddr, uint16_t rows);

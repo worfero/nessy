@@ -81,6 +81,14 @@ void NES::reset(){
     cycleCount = 0;
 }
 
+bool NES::isFrameComplete(){
+    return ppu.frameComplete;
+}
+
+void NES::nextFrame(){
+    ppu.frameComplete = false;
+}
+
 void NES::printCycleCounts(){
     std::printf("---------Cycles--------- \nSystem clocks: %lu \nCPU clocks: %lu\nCPU Steps: %lu\nPPU Cycle: %u\nPPU Scanline: %d\nNMI: %d\n\n",
                     cycleCount, getCpuCycleCount(), getCpuSteps(), getPpuCycle(), getPpuScanline(), cpu.nmi);
@@ -128,6 +136,10 @@ void NES::printPpuState(){
 
 void NES::printPpuTileFetch(){
     ppu.printCurrentTile();
+}
+
+uint32_t *NES::getPpuFramebuffer(){
+    return ppu.getFramebuffer();
 }
 
 void NES::printMemoryMap(uint16_t startAddr, uint16_t rows){
