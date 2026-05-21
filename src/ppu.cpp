@@ -31,95 +31,35 @@ PPU::PPU(){
 
 void PPU::clock(){
     if((registers.PPUMASK & 0x08) > 0){
-        if(scanline >= -1 && scanline < 240 && cycle == 257){
+        if(scanline >= PRE_RENDER && scanline < POST_RENDER && cycle == HORIZONTAL_UPDATE_CYCLE){
             updateHorizontalBits();
         }
 
-        if(scanline == -1 && cycle >= 280 && cycle < 305){
+        if(scanline == PRE_RENDER && cycle >= VERTICAL_UPDATE_START_CYCLE && cycle < VERTICAL_UPDATE_END_CYCLE){
             updateVerticalBits();
         }
 
-        if(scanline >= -1 && scanline < 240 && ((cycle > 0 && cycle <= 256) || (cycle > 320 && cycle <= 336))){
-            uint16_t patternBase = (registers.PPUCTRL & 0x10) ? 0x1000 : 0x0000;
-            uint8_t colorSelect = 0;
+        if(scanline >= PRE_RENDER && scanline < POST_RENDER && ((cycle > FIRST_CYCLE && cycle <= LAST_VISIBLE_CYCLE) || (cycle > PRE_FETCH_START_CYCLE && cycle <= PRE_FETCH_END_CYCLE))){
+            fetchRoutine();
 
-            // 8-cycle fetch routine
-            switch(cycle % 8){
-                case 0:
-                    bgPatternLowBits = (bgPatternLowBits & 0xFF00) | lowBitPattern;
-                    bgPatternHiBits = (bgPatternHiBits & 0xFF00) | hiBitPattern;
+            if(cycle == LAST_VISIBLE_CYCLE) incrementFineY();
 
-                    colorSelect = nextAttribute;
-                    if(v_reg & 0x40) colorSelect >>= 4;
-                    if(v_reg & 0x02) colorSelect >>= 2;
-                    colorSelect &= 0x03;
-                    bgAttributeLowBits = (colorSelect & 0x01) ? (bgAttributeLowBits & 0xFF00) | 0x00FF : (bgAttributeLowBits & 0xFF00) | 0x0000;
-                    bgAttributeHiBits = (colorSelect & 0x02) ? (bgAttributeHiBits & 0xFF00) | 0x00FF : (bgAttributeHiBits & 0xFF00) | 0x0000;
+            updateFramebuffer();
 
-                    incrementCoarseX();
-                    break;
-                    
-                case 1:
-                    nextTileID = read(0x2000 | (v_reg & 0x0FFF));
-                    break;
-
-                case 3:
-                    nextAttribute = read(0x23C0 | (v_reg & 0x0C00) | ((v_reg >> 4) & 0x38) | ((v_reg >> 2) & 0x07));
-                    break;
-                
-                case 5:
-                    lowBitPattern = read(patternBase + (nextTileID * 16) + FINE_Y);
-                    break;
-
-                case 7:
-                    hiBitPattern = read(patternBase + (nextTileID * 16) + FINE_Y + 8);
-                    break;
-
-                default:
-                    break;
-            }
-
-            if(cycle == 256) incrementFineY();
-
-            uint16_t bitMux = 0x8000 >> x_reg;
-
-            uint8_t p0 = (bgPatternLowBits & bitMux) ? 1 : 0;
-            uint8_t p1 = (bgPatternHiBits  & bitMux) ? 1 : 0;
-            uint8_t a0 = (bgAttributeLowBits & bitMux) ? 1 : 0;
-            uint8_t a1 = (bgAttributeHiBits  & bitMux) ? 1 : 0;
-
-            uint8_t palette = (a1 << 1) | a0;
-            uint8_t pixel = (p1 << 1) | p0;
-
-            if(pixel == 0){
-                paletteAddress = PALETTE_START_ADDR;
-            }
-            else{
-                paletteAddress = PALETTE_START_ADDR + (palette * 4) + pixel;
-            }
-
-            if(scanline >= 0 && scanline < 240 && cycle > 0 && cycle <= 256){
-                uint32_t pixelColor = nesPalette[read(paletteAddress) & 0x3F];
-                framebuffer.at((scanline * 256) + cycle - 1) = pixelColor;   
-            }
-
-            bgAttributeLowBits <<= 1;
-            bgAttributeHiBits <<= 1;
-            bgPatternLowBits <<= 1;
-            bgPatternHiBits <<= 1;
+            shiftRegisters();
         }
     }
 
     cycle++;
 
-    if(cycle == 341){
-        cycle = 0;
+    if(cycle > LAST_CYCLE){
+        cycle = FIRST_CYCLE;
         scanline++;
 
-        if(scanline == 261) scanline = -1;
+        if(scanline > VBLANK_END) scanline = PRE_RENDER;
     }
 
-    if(scanline == 241 && cycle == 1) {
+    if(scanline == VBLANK_START) {
         setFlag(VBLANK, 1);
         if((registers.PPUCTRL & 0x80) != 0){
             cpu->requestNMI();
@@ -128,11 +68,82 @@ void PPU::clock(){
         frameComplete = true;
     }
 
-    if(scanline == -1 && cycle == 1) setFlag(VBLANK, 0);
+    if(scanline == PRE_RENDER && cycle == FIRST_VISIBLE_CYCLE) setFlag(VBLANK, 0);
+}
+
+void PPU::fetchRoutine(){
+    uint16_t patternBase = (registers.PPUCTRL & 0x10) ? 0x1000 : 0x0000;
+    uint8_t colorSelect = 0;
+
+    // 8-cycle fetch routine
+    switch(cycle % 8){
+        case 0:
+            bgPatternLowBits = (bgPatternLowBits & 0xFF00) | lowBitPattern;
+            bgPatternHiBits = (bgPatternHiBits & 0xFF00) | hiBitPattern;
+
+            colorSelect = nextAttribute;
+            if(v_reg & 0x40) colorSelect >>= 4;
+            if(v_reg & 0x02) colorSelect >>= 2;
+            colorSelect &= 0x03;
+            bgAttributeLowBits = (colorSelect & 0x01) ? (bgAttributeLowBits & 0xFF00) | 0x00FF : (bgAttributeLowBits & 0xFF00) | 0x0000;
+            bgAttributeHiBits = (colorSelect & 0x02) ? (bgAttributeHiBits & 0xFF00) | 0x00FF : (bgAttributeHiBits & 0xFF00) | 0x0000;
+
+            incrementCoarseX();
+            break;
+            
+        case 1:
+            nextTileID = read(0x2000 | (v_reg & 0x0FFF));
+            break;
+
+        case 3:
+            nextAttribute = read(0x23C0 | (v_reg & 0x0C00) | ((v_reg >> 4) & 0x38) | ((v_reg >> 2) & 0x07));
+            break;
+        
+        case 5:
+            lowBitPattern = read(patternBase + (nextTileID * 16) + FINE_Y);
+            break;
+
+        case 7:
+            hiBitPattern = read(patternBase + (nextTileID * 16) + FINE_Y + 8);
+            break;
+
+        default:
+            break;
+    }
+}
+
+void PPU::updateFramebuffer(){
+    uint16_t bitMux = 0x8000 >> x_reg;
+
+    uint8_t p0 = (bgPatternLowBits & bitMux) ? 1 : 0;
+    uint8_t p1 = (bgPatternHiBits  & bitMux) ? 1 : 0;
+    uint8_t a0 = (bgAttributeLowBits & bitMux) ? 1 : 0;
+    uint8_t a1 = (bgAttributeHiBits  & bitMux) ? 1 : 0;
+
+    uint8_t palette = (a1 << 1) | a0;
+    uint8_t pixel = (p1 << 1) | p0;
+
+    if(pixel == 0){
+        paletteAddress = PALETTE_START_ADDR;
+    }
+    else{
+        paletteAddress = PALETTE_START_ADDR + (palette * 4) + pixel;
+    }
+
+    if(scanline >= VISIBLE_START && scanline <= VISIBLE_END && cycle > FIRST_CYCLE && cycle <= LAST_VISIBLE_CYCLE){
+        uint32_t pixelColor = nesPalette[read(paletteAddress) & 0x3F];
+        framebuffer.at((scanline * 256) + cycle - 1) = pixelColor;   
+    }
+}
+
+void PPU::shiftRegisters(){
+    bgAttributeLowBits <<= 1;
+    bgAttributeHiBits <<= 1;
+    bgPatternLowBits <<= 1;
+    bgPatternHiBits <<= 1;
 }
 
 void PPU::updateHorizontalBits(){
-    // clear the 
     v_reg = (v_reg & 0x7BE0) | (t_reg & 0x041F);
 }
 

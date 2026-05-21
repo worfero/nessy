@@ -15,6 +15,25 @@
 
 #define FINE_Y                  ((v_reg >> 12) & 0x07)
 
+// scanline constants
+constexpr int PRE_RENDER = -1;
+constexpr int VISIBLE_START = 0;
+constexpr int VISIBLE_END = 239;
+constexpr int POST_RENDER = 240;
+constexpr int VBLANK_START = 241;
+constexpr int VBLANK_END = 260;
+
+// cycle constants
+constexpr int FIRST_CYCLE = 0;
+constexpr int LAST_CYCLE = 340;
+constexpr int FIRST_VISIBLE_CYCLE = 1;
+constexpr int LAST_VISIBLE_CYCLE = 256;
+constexpr int HORIZONTAL_UPDATE_CYCLE = 257;
+constexpr int VERTICAL_UPDATE_START_CYCLE = 280;
+constexpr int VERTICAL_UPDATE_END_CYCLE = 305;
+constexpr int PRE_FETCH_START_CYCLE = 320;
+constexpr int PRE_FETCH_END_CYCLE = 336;
+
 class Cartridge;
 class CPU;
 
@@ -34,6 +53,9 @@ class PPU{
         void connectCPU(CPU *selec_cpu);
 
         void clock();
+        void fetchRoutine();
+        void updateFramebuffer();
+        void shiftRegisters();
 
         void setFlag(StatusFlag flag, bool value);
         bool getFlag(StatusFlag flag) const;

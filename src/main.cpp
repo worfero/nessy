@@ -10,11 +10,24 @@ int main(){
     nes.powerOn();
 
     SDL_Init(SDL_INIT_VIDEO);
-    SDL_Window *window = SDL_CreateWindow("Framebuffer Rendering!", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, WIDTH, HEIGHT, SDL_WINDOW_SHOWN);
+    SDL_Window *window = SDL_CreateWindow(
+        "NES Emulator!", 
+        SDL_WINDOWPOS_UNDEFINED, 
+        SDL_WINDOWPOS_UNDEFINED, 
+        WIDTH*3, 
+        HEIGHT*3, 
+        SDL_WINDOW_SHOWN
+    );
 
-    SDL_Surface *surface = SDL_GetWindowSurface(window);
-    uint32_t* pixels;
-    pixels = (uint32_t*)surface->pixels;
+    SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+
+    SDL_Texture* texture = SDL_CreateTexture(
+        renderer,
+        SDL_PIXELFORMAT_ARGB8888,
+        SDL_TEXTUREACCESS_STREAMING,
+        WIDTH,
+        HEIGHT
+    );
 
     bool quit = false;
     SDL_Event e;
@@ -30,19 +43,25 @@ int main(){
         }
         while(!nes.isFrameComplete());
 
-        SDL_LockSurface(surface);
-
-        memset(pixels, 0, sizeof(uint32_t) * WIDTH * HEIGHT);
-
-        memcpy(
-            pixels,
+        SDL_UpdateTexture(
+            texture,
+            nullptr,
             nes.getPpuFramebuffer(),
-            256 * 240 * sizeof(uint32_t)
+            WIDTH * sizeof(uint32_t)
         );
 
-        SDL_UpdateWindowSurface(window);
+        SDL_RenderClear(renderer);
 
-        SDL_UnlockSurface(surface);
+        SDL_Rect dst = {
+            0,
+            0,
+            WIDTH*3,
+            HEIGHT*3
+        };
+
+        SDL_RenderCopy(renderer, texture, nullptr, &dst);
+
+        SDL_RenderPresent(renderer);
 
         nes.nextFrame();
     }
