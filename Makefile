@@ -22,3 +22,7 @@ clean:
 
 run: $(TARGET)
 	@$(TARGET)
+
+nes:
+	ca65 asm/main.asm -o asm/main.o
+	ld65 -C asm/linker.cfg asm/main.o -o test.nes

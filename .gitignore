@@ -3,3 +3,4 @@ notes.txt
 *.nes
 *.fns
 *.asm
+asm/*
