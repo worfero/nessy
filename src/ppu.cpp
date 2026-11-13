@@ -30,24 +30,26 @@ PPU::PPU(){
 }
 
 void PPU::clock(){
-    if((registers.PPUMASK & 0x08) > 0){
-        if(scanline >= PRE_RENDER && scanline < POST_RENDER && cycle == HORIZONTAL_UPDATE_CYCLE){
-            updateHorizontalBits();
+    if((registers.PPUMASK & 0x18) > 0){
+        if(scanline >= PRE_RENDER && scanline < POST_RENDER && ((cycle > FIRST_CYCLE && cycle <= LAST_VISIBLE_CYCLE) || (cycle > PRE_FETCH_START_CYCLE && cycle <= PRE_FETCH_END_CYCLE))){
+            fetchRoutine();
+            shiftRegisters();
+
+            if(scanline >= VISIBLE_START && cycle <= LAST_VISIBLE_CYCLE) updateFramebuffer();
+        }
+
+        if(scanline >= PRE_RENDER && scanline < POST_RENDER){
+            if(cycle == HORIZONTAL_UPDATE_CYCLE) updateHorizontalBits();
+            if(cycle == LAST_VISIBLE_CYCLE) incrementFineY();
         }
 
         if(scanline == PRE_RENDER && cycle >= VERTICAL_UPDATE_START_CYCLE && cycle < VERTICAL_UPDATE_END_CYCLE){
             updateVerticalBits();
         }
+    }
 
-        if(scanline >= PRE_RENDER && scanline < POST_RENDER && ((cycle > FIRST_CYCLE && cycle <= LAST_VISIBLE_CYCLE) || (cycle > PRE_FETCH_START_CYCLE && cycle <= PRE_FETCH_END_CYCLE))){
-            fetchRoutine();
-
-            if(cycle == LAST_VISIBLE_CYCLE) incrementFineY();
-
-            updateFramebuffer();
-
-            shiftRegisters();
-        }
+    else if(scanline >= VISIBLE_START && scanline <= VISIBLE_END && cycle >= FIRST_VISIBLE_CYCLE && cycle <= LAST_VISIBLE_CYCLE){
+        framebuffer.at((scanline * 256) + cycle - 1) = nesPalette[read(PALETTE_START_ADDR) & 0x3F];
     }
 
     cycle++;
@@ -59,7 +61,7 @@ void PPU::clock(){
         if(scanline > VBLANK_END) scanline = PRE_RENDER;
     }
 
-    if(scanline == VBLANK_START) {
+    if(scanline == VBLANK_START && cycle == FIRST_VISIBLE_CYCLE) {
         setFlag(VBLANK, 1);
         if((registers.PPUCTRL & 0x80) != 0){
             cpu->requestNMI();
@@ -72,30 +74,40 @@ void PPU::clock(){
 }
 
 void PPU::fetchRoutine(){
+    // pattern base is decided by PPUCTRL bit 4
     uint16_t patternBase = (registers.PPUCTRL & 0x10) ? 0x1000 : 0x0000;
-    uint8_t colorSelect = 0;
+    uint8_t paletteSelect = 0;
 
     // 8-cycle fetch routine
     switch(cycle % 8){
         case 0:
+            // every cycle the bits are shifted left once, so every 8 cycles the previously fetched pattern is ready for the next tile
             bgPatternLowBits = (bgPatternLowBits & 0xFF00) | lowBitPattern;
             bgPatternHiBits = (bgPatternHiBits & 0xFF00) | hiBitPattern;
 
-            colorSelect = nextAttribute;
-            if(v_reg & 0x40) colorSelect >>= 4;
-            if(v_reg & 0x02) colorSelect >>= 2;
-            colorSelect &= 0x03;
-            bgAttributeLowBits = (colorSelect & 0x01) ? (bgAttributeLowBits & 0xFF00) | 0x00FF : (bgAttributeLowBits & 0xFF00) | 0x0000;
-            bgAttributeHiBits = (colorSelect & 0x02) ? (bgAttributeHiBits & 0xFF00) | 0x00FF : (bgAttributeHiBits & 0xFF00) | 0x0000;
+            // gets the palette colors for the tile grid
+            paletteSelect = nextAttribute;
+
+            // if the tile is on the bottom (coarse Y bit 1 equals to 1), palette is from the high nibble of the attribute value
+            if(v_reg & 0x40) paletteSelect >>= 4;
+            // if the tile is on the right side (coarse X bit 1 equals to 1), palette is defined by the most significant 2 bits of the selected nibble
+            if(v_reg & 0x02) paletteSelect >>= 2;
+            // palette is the first two bits
+            paletteSelect &= 0x03;
+            // attribute is the same for every pixel in the tile, so depending on the palette high or low bit, every attribute low and high bit for the next tile is set accordingly
+            bgAttributeLowBits = (paletteSelect & 0x01) ? (bgAttributeLowBits & 0xFF00) | 0x00FF : (bgAttributeLowBits & 0xFF00) | 0x0000;
+            bgAttributeHiBits = (paletteSelect & 0x02) ? (bgAttributeHiBits & 0xFF00) | 0x00FF : (bgAttributeHiBits & 0xFF00) | 0x0000;
 
             incrementCoarseX();
             break;
             
         case 1:
+            // decides what tile to be rendered next, by nametable select, coarse X and coarse Y
             nextTileID = read(0x2000 | (v_reg & 0x0FFF));
             break;
 
         case 3:
+            // first OR selects the nametable, second one divides coarse Y by 4 and places it on bits 3-5, last one divides coarse X by 4 and places it on bits 0-2
             nextAttribute = read(0x23C0 | (v_reg & 0x0C00) | ((v_reg >> 4) & 0x38) | ((v_reg >> 2) & 0x07));
             break;
         
@@ -204,6 +216,8 @@ void PPU::writeReg(uint16_t addr, uint8_t data){
     switch(addr){
         case 0x2000:
             registers.PPUCTRL = data;
+            // update nametable selection (bits 10-11 of t_reg and v_reg), so it works as a 9th bit of horizontal scrolling (aka scrolling "into" a different nametable)
+            t_reg = (t_reg & 0xF3FF) | ((data & 0x03) << 10);
             break;
         case 0x2001:
             registers.PPUMASK = data;
