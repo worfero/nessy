@@ -25,14 +25,18 @@ constexpr int VBLANK_END = 260;
 
 // cycle constants
 constexpr int FIRST_CYCLE = 0;
+constexpr int FIRST_SHIFT_CYCLE = 2;
 constexpr int LAST_CYCLE = 340;
 constexpr int FIRST_VISIBLE_CYCLE = 1;
 constexpr int LAST_VISIBLE_CYCLE = 256;
+constexpr int LAST_SHIFT_CYCLE = 257;
 constexpr int HORIZONTAL_UPDATE_CYCLE = 257;
 constexpr int VERTICAL_UPDATE_START_CYCLE = 280;
 constexpr int VERTICAL_UPDATE_END_CYCLE = 305;
-constexpr int PRE_FETCH_START_CYCLE = 320;
+constexpr int PRE_FETCH_START_CYCLE = 321;
+constexpr int PRE_FETCH_FIRST_SHIFT_CYCLE = 322;
 constexpr int PRE_FETCH_END_CYCLE = 336;
+constexpr int PRE_FETCH_LAST_SHIFT_CYCLE = 337;
 
 class Cartridge;
 class CPU;

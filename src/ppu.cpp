@@ -30,28 +30,37 @@ PPU::PPU(){
 }
 
 void PPU::clock(){
+    // if rendering is enabled
     if((registers.PPUMASK & 0x18) > 0){
-        if(scanline >= PRE_RENDER && scanline < POST_RENDER && ((cycle > FIRST_CYCLE && cycle <= LAST_VISIBLE_CYCLE) || (cycle > PRE_FETCH_START_CYCLE && cycle <= PRE_FETCH_END_CYCLE))){
-            fetchRoutine();
-            shiftRegisters();
-
-            if(scanline >= VISIBLE_START && cycle <= LAST_VISIBLE_CYCLE) updateFramebuffer();
-        }
-
         if(scanline >= PRE_RENDER && scanline < POST_RENDER){
+            // shift registers always after the first fetch
+            if((cycle >= FIRST_SHIFT_CYCLE && cycle <= LAST_SHIFT_CYCLE) || (cycle >= PRE_FETCH_FIRST_SHIFT_CYCLE && cycle <= PRE_FETCH_LAST_SHIFT_CYCLE)) shiftRegisters();
+            
+            // fetch background data during visible cycles and pre-fetch cycles
+            if((cycle >= FIRST_VISIBLE_CYCLE && cycle <= LAST_SHIFT_CYCLE) || (cycle >= PRE_FETCH_START_CYCLE && cycle <= PRE_FETCH_LAST_SHIFT_CYCLE)) fetchRoutine();
+            
+            // update framebuffer with fetched data while on visible area
+            if(scanline >= VISIBLE_START && (cycle >= FIRST_VISIBLE_CYCLE && cycle <= LAST_VISIBLE_CYCLE)) updateFramebuffer();
+
+            // move horizontal portion of t_reg into v_reg (basically resetting the current 'x' coordinate to the start of the screen)
             if(cycle == HORIZONTAL_UPDATE_CYCLE) updateHorizontalBits();
+
+            // increment fine Y to fetch the next line of the screen after the current scanline is completed
             if(cycle == LAST_VISIBLE_CYCLE) incrementFineY();
         }
 
+        // on pre-render, update the vertical portion of v_reg with the correspondent of t_reg (basically resetting the current 'y' coordinate to the start of the screen)
         if(scanline == PRE_RENDER && cycle >= VERTICAL_UPDATE_START_CYCLE && cycle < VERTICAL_UPDATE_END_CYCLE){
             updateVerticalBits();
         }
     }
 
+    // use the framebuffer vector to render the selected rgb into the screen window
     else if(scanline >= VISIBLE_START && scanline <= VISIBLE_END && cycle >= FIRST_VISIBLE_CYCLE && cycle <= LAST_VISIBLE_CYCLE){
         framebuffer.at((scanline * 256) + cycle - 1) = nesPalette[read(PALETTE_START_ADDR) & 0x3F];
     }
 
+    // next cycle
     cycle++;
 
     if(cycle > LAST_CYCLE){
@@ -61,6 +70,7 @@ void PPU::clock(){
         if(scanline > VBLANK_END) scanline = PRE_RENDER;
     }
 
+    // set VBLANK flag at VBLANK start
     if(scanline == VBLANK_START && cycle == FIRST_VISIBLE_CYCLE) {
         setFlag(VBLANK, 1);
         if((registers.PPUCTRL & 0x80) != 0){
@@ -70,51 +80,57 @@ void PPU::clock(){
         frameComplete = true;
     }
 
+    // reset VBLANK flag at VBLANK end
     if(scanline == PRE_RENDER && cycle == FIRST_VISIBLE_CYCLE) setFlag(VBLANK, 0);
 }
 
 void PPU::fetchRoutine(){
     // pattern base is decided by PPUCTRL bit 4
     uint16_t patternBase = (registers.PPUCTRL & 0x10) ? 0x1000 : 0x0000;
-    uint8_t paletteSelect = 0;
+    uint8_t nextPalette = 0;
 
     // 8-cycle fetch routine
     switch(cycle % 8){
+        // move to the next tile
         case 0:
-            // every cycle the bits are shifted left once, so every 8 cycles the previously fetched pattern is ready for the next tile
-            bgPatternLowBits = (bgPatternLowBits & 0xFF00) | lowBitPattern;
-            bgPatternHiBits = (bgPatternHiBits & 0xFF00) | hiBitPattern;
-
-            // gets the palette colors for the tile grid
-            paletteSelect = nextAttribute;
-
-            // if the tile is on the bottom (coarse Y bit 1 equals to 1), palette is from the high nibble of the attribute value
-            if(v_reg & 0x40) paletteSelect >>= 4;
-            // if the tile is on the right side (coarse X bit 1 equals to 1), palette is defined by the most significant 2 bits of the selected nibble
-            if(v_reg & 0x02) paletteSelect >>= 2;
-            // palette is the first two bits
-            paletteSelect &= 0x03;
-            // attribute is the same for every pixel in the tile, so depending on the palette high or low bit, every attribute low and high bit for the next tile is set accordingly
-            bgAttributeLowBits = (paletteSelect & 0x01) ? (bgAttributeLowBits & 0xFF00) | 0x00FF : (bgAttributeLowBits & 0xFF00) | 0x0000;
-            bgAttributeHiBits = (paletteSelect & 0x02) ? (bgAttributeHiBits & 0xFF00) | 0x00FF : (bgAttributeHiBits & 0xFF00) | 0x0000;
-
             incrementCoarseX();
             break;
             
+        // tile fetch    
         case 1:
+            // every cycle the bits are shifted left once, so every 8 cycles the previously fetched pattern is ready for the next tile
+            bgPatternLowBits = (bgPatternLowBits & 0xFF00) | lowBitPattern;
+            bgPatternHiBits = (bgPatternHiBits & 0xFF00) | hiBitPattern;
+            // attribute is the same for every pixel in the tile, so depending on the palette high or low bit, every attribute low and high bit for the next tile is set accordingly
+            bgAttributeLowBits = (nextPalette & 0x01) ? (bgAttributeLowBits & 0xFF00) | 0x00FF : (bgAttributeLowBits & 0xFF00) | 0x0000;
+            bgAttributeHiBits = (nextPalette & 0x02) ? (bgAttributeHiBits & 0xFF00) | 0x00FF : (bgAttributeHiBits & 0xFF00) | 0x0000;
+
             // decides what tile to be rendered next, by nametable select, coarse X and coarse Y
             nextTileID = read(0x2000 | (v_reg & 0x0FFF));
             break;
 
+        // palette selection
         case 3:
             // first OR selects the nametable, second one divides coarse Y by 4 and places it on bits 3-5, last one divides coarse X by 4 and places it on bits 0-2
             nextAttribute = read(0x23C0 | (v_reg & 0x0C00) | ((v_reg >> 4) & 0x38) | ((v_reg >> 2) & 0x07));
+
+            // gets the palette colors for the tile grid from the attribute table
+            nextPalette = nextAttribute;
+            // if the tile is on the bottom (coarse Y bit 1 equals to 1), palette is from the high nibble of the attribute value
+            if(v_reg & 0x40) nextPalette >>= 4;
+            // if the tile is on the right side (coarse X bit 1 equals to 1), palette is defined by the most significant 2 bits of the selected nibble
+            if(v_reg & 0x02) nextPalette >>= 2;
+
+            // palette is the first two bits
+            nextPalette &= 0x03;
             break;
         
+        // pixel colors low bit selection
         case 5:
             lowBitPattern = read(patternBase + (nextTileID * 16) + FINE_Y);
             break;
 
+        // pixel colors high bit selection
         case 7:
             hiBitPattern = read(patternBase + (nextTileID * 16) + FINE_Y + 8);
             break;
